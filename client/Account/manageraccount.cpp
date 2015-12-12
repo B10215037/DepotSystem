@@ -1,20 +1,20 @@
 #include "manageraccount.h"
 
-ManagerAccount::ManagerAccount(QString id, QString password) : id(id), password(password)
-{
+ManagerAccount::ManagerAccount(QString id) : Account(id)
+{}
+
+QList<Order> ManagerAccount::getOrdersWereTaken() {
+    //連線請求
 }
 
-QList<Order> ManagerAccount::getOrdersTaken() {
-    return ordersTaken;
+QList<Order> ManagerAccount::getOrdersWillBeTaken() {
+    //連線請求
 }
 
-Order ManagerAccount::takeOrder(int number) {
-    return ordersTaken[number];
+void ManagerAccount::acceptOrder(int index) {
+    //連線請求
 }
 
-QList<Order> ManagerAccount::takeOrders(QList<int> numberList) {
-    QList<Order> someOrders = new QList<Order>;
-    for (int i = 0; i < numberList.size(); i++)
-        someOrders.append(ordersTaken[numberList[i]]);
-    return someOrders;
+void ManagerAccount::rejectOrder(int index) {
+    //連線請求
 }

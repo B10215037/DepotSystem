@@ -1,14 +1,4 @@
-#include "account.h"
+#include "Account.h"
 
-Account::Account(QString id, QString password) : id(id), password(password)
-{
-}
-
-QList<Order> Account::getOrders() {
-    return orders;
-}
-
-Order Account::createOrders(QList<Item> items) {
-    Order order = new Order(items);
-    return order;
-}
+Account::Account(QString id) : id(id)
+{}

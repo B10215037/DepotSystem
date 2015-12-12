@@ -14,11 +14,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp\
-        account.cpp \
-    manageraccount.cpp
+    Account.cpp \
+    ManagerAccount.cpp \
+    CustomerAccount.cpp
 
 HEADERS  += mainwindow.h\
-         account.h \
-    manageraccount.h
+    Account.h \
+    ManagerAccount.h \
+    CustomerAccount.h
 
 FORMS    += mainwindow.ui
