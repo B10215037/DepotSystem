@@ -5,14 +5,13 @@
 
 class ManagerAccount : public Account
 {
+private:
+    QList<Order> ordersTaken;
 public:
-
-
-    ManagerAccount();
-
+    ManagerAccount(QString id, QString password);
     QList<Order> getOrdersTaken();
     Order takeOrder(int number);
-    takeOrders(QList<int> numberList);
+    QList<Order> takeOrders(QList<int> numberList);
 };
 
 #endif // MANAGERACCOUNT_H

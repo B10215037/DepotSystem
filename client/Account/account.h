@@ -4,14 +4,15 @@
 #include <QString>
 #include <QVector>
 
-class Account
+class Account // == CustomerAccount
 {
-public:
+protected:
     QString id, password;
     QList<Order> orders;
 
+public:
     Account(QString id, QString password);
-    Order getOrders();
+    QList<Order> getOrders();
     Order createOrders(QList<Item> items);
 };
 
