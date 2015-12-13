@@ -11,7 +11,7 @@ class Connector : public QNetworkAccessManager
 public:
     Connector();
 
-    void request(QString url, QByteArray request);
+    void request(QString url, QByteArray jsonData);
 
 signals:
     void sendReceivedMessage(QString response);
