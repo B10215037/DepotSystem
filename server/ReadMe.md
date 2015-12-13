@@ -1,0 +1,24 @@
+IP/register
+=====
+使用:POST
+格式:{"username": "dolan", "password":"xyz"}
+
+IP/login
+=====
+使用:POST
+格式:{"username": "dolan", "password":"xyz"}
+
+IP/logout
+=====
+使用:GET
+格式:沒有
+
+IP/products
+=====
+使用:POST(需要cookie，管理員限定，一般使用者無法使用)
+格式:{"productname": "toast", "stock":"30", "price", "100"}
+說明:管理員新增一筆產品，stock表示進貨數量
+
+使用:GET
+格式:沒有格式
+說明:會回傳所有產品的清單(json)
