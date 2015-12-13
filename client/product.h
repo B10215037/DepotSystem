@@ -13,11 +13,13 @@ public:
 	void setStock(int amount);
 	int getPrice();
 	void setPrice(int price);
+	int getID();
 
 private:
 	QString name;
 	int stock;
 	int price;
+	int ID;
 
 };
 

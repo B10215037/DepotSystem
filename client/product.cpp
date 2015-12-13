@@ -36,3 +36,8 @@ void Product::setPrice(int price)
 {
 	this.price = price;
 }
+
+int Product::getID()
+{
+	return ID;
+}
