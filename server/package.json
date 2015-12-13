@@ -4,6 +4,7 @@
   "description": "A school assignment",
   "main": "main.js",
   "dependencies": {
+    "client-sessions": "^0.7.0",
     "mongoose": "^4.3.1",
     "restify": "^4.0.3"
   },

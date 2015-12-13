@@ -1,3 +1,10 @@
+目前的使用者(帳號 密碼)
+=====
+* admin     admin
+* dolan     xyz
+* dolan2    xyz
+* dolan3    xyz
+
 IP/register
 =====
 * 使用:POST
