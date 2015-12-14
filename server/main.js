@@ -144,23 +144,66 @@ server.post('/products', function(request, response, next){
         response.send(400, {message: "fuck you gooby!!!, you didn't login or you are not an admin!!"});
     } else {
         Account.findOne({username: request.depotSession.username}, function (err, user) {
+            if(err){
+                response.send(400, {message: "Sorry gooby!!!, Account Error!!!"});
+            }
             if(user.type == "admin"){
-                if(request.params.productname && request.params.stock && request.params.price){
-                    var product = new Product({
-                        name:request.params.productname,
-                        stock:request.params.stock,
-                        price:request.params.price
-                    });
-                    product.save(function(error){
-                        if(error){
-                            response.send(500, {message: "sorry gooby, database server is down!!"});
+                if(request.params.productname){
+                    Product.findOne({name: request.params.productname}, function (err, product) {
+                        if(err)
+                        {
+                            console.log("error:" + err);
+                            response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
                         }else{
-                            response.send(200, {message: "Successful, very good gooby, You add a product."});
+                            console.log(" product = " + product);
+                            if(product){
+                                response.send(400, {message: "fuck you gooby!!!, this product has already been added!!"});
+                            }else{
+                                var product = new Product({
+                                    name:request.params.productname,
+                                    stock:request.params.stock,
+                                    price:request.params.price
+                                });
+                                product.save(function(error){
+                                    if(error){
+                                        response.send(500, {message: "Sorry gooby, database server is down!!"});
+                                    }else{
+                                        response.send(200, {message: "Successful, very good gooby, You add a product."});
+                                    }
+                                });
+                            }
                         }
-                    });
+                    })
                 }else{
-                    response.send(500, {message: "fuck you gooby, send the right format!!!"});
+                    response.send(400, {message: "fuck you gooby, send the right format!!!"});
                 }
+//                Product.findOne({name: request.params.productname}, function (err, product){
+//                    if(err){
+//                        console.log("error");
+//                        response.send(400, {message: "Sorry gooby!!!, Product Error!!!"});
+//                    }
+//                    if(product){
+//                        response.send(400, {message: "fuck you gooby!!!, this product has already been added!!"});
+//                    }else{
+//                        console.log(request.params.productname);
+//                        if(request.params.productname && request.params.stock && request.params.price){
+//                            var product = new Product({
+//                                name:request.params.productname,
+//                                stock:request.params.stock,
+//                                price:request.params.price
+//                            });
+//                            product.save(function(error){
+//                                if(error){
+//                                    response.send(500, {message: "Sorry gooby, database server is down!!"});
+//                                }else{
+//                                    response.send(200, {message: "Successful, very good gooby, You add a product."});
+//                                }
+//                            });
+//                        }else{
+//                            response.send(500, {message: "fuck you gooby, send the right format!!!"});
+//                        }
+//                    }
+//                });
             }else if(user.type == "customer"){
                 response.send(500, {message: "fuck you gooby, you are not a admin!!!"});
             }else{
@@ -186,15 +229,14 @@ server.put('/products', function(request, response, next){
             if(user.type == "admin"){
                 if(request.params.productname){
                     Product.findOne({name: request.params.productname}, function (err, product) {
-                        if(err)
-                        {
+                        if(err){
                             console.log("error:" + err);
                             response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
                         }else{
-                            console.log(" product = " + product);
+                            console.log("product = " + product);
                             if(product){
                                 if(request.params.stock){
-                                    var stock = parseInt(product.stock) + parseInt(request.params.stock)
+                                    var stock = parseInt(product.stock) + parseInt(request.params.stock);
                                     product.stock = stock.toString();
                                 }
                                 if(request.params.price){
@@ -202,11 +244,11 @@ server.put('/products', function(request, response, next){
                                 }
                                 product.save(function(error) {
                                     if(error){
-                                        response.send(500, {message: "sorry gooby, database server is down!!"});
+                                        response.send(500, {message: "Sorry gooby, database server is down!!"});
                                     }else{
                                         response.send(200, {message: "Successful, very good gooby, You update a product."});
                                     }
-                                })
+                                });
                             }
                         }
                     })
