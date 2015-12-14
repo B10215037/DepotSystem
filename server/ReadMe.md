@@ -1,10 +1,15 @@
 重要事項
 =====
 感謝OQ花了浪費一堆時間讓server端得到了一些心得
+
 如果出現了Bad Request或者Internal Server Error，表示你連進來了，不過因為一些原因被server擋下操作，
+
 我這邊會回傳post錯誤時的訊息，你們Qt應該有辦法拿到那個訊息才對，不應該只是出現Bad Request或者Internal Server Error，
+
 正常來說會出現被server reject的原因，例如:"fuck you gooby!!!, you didn't login or you are not an admin!!"
+
 所以你們應該要想辦法找出怎麼用Qt噴出這些訊息，不然就會像OQ那樣Debug半天 :D
+
 
 目前的使用者(帳號 密碼)
 =====
