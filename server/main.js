@@ -1,5 +1,6 @@
 //db.getCollectionNames()
-//db.accounts.find({})
+//db.accounts.find()
+//db.products.remove({"name":"toastA"})
 var restify  = require('restify');
 var server   = restify.createServer();
 server.use(restify.bodyParser());
