@@ -11,7 +11,20 @@ class Connector : public QNetworkAccessManager
 public:
     Connector();
 
-    void request(QString url, QByteArray jsonData);
+    QByteArray getLogInFormat(QString username, QString password);
+
+    ///login
+    void logIn(QByteArray jsonData);
+
+    ///products
+    void postNewProducts(QByteArray jsonData);
+    void getProductsInfo();
+    void putEditedProducts(QByteArray jsonData);
+
+private:
+    QString serverUrl;
+
+    QNetworkRequest setRequest(QString path, int dataSize);
 
 signals:
     void sendReceivedMessage(QString response);
