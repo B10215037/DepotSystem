@@ -7,6 +7,8 @@
 #include "Form/loginform.h"
 #include "Form/customermenuform.h"
 #include "Form/managermenuform.h"
+#include "Form/productmanagementform.h"
+#include "Form/ordermanagementform.h"
 
 namespace Ui {
 class UserView;

@@ -7,7 +7,7 @@ Product::Product()
 	price = 0;
 }
 
-QString getName()
+QString Product::getName()
 {
 	return name;
 }
@@ -34,7 +34,7 @@ int Product::getPrice()
 
 void Product::setPrice(int price)
 {
-	this.price = price;
+    this->price = price;
 }
 
 int Product::getID()

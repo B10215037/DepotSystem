@@ -7,7 +7,7 @@ HEADERS += ../Account/Account.h \
 
 SOURCES += ../Account/Account.cpp \
         ../Account/CustomerAccount.cpp \
-        ../Account/ManagerAccount.h \
+        ../Account/ManagerAccount.cpp \
         ../Connector/Connector.cpp \
         ../Order/Order.cpp \
         ../Product/Product.cpp

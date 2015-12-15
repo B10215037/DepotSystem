@@ -2,6 +2,7 @@
 #define MANAGERACCOUNT_H
 
 #include "Account.h"
+#include "../Order/Order.h"
 
 class ManagerAccount : public Account
 {

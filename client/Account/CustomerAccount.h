@@ -2,6 +2,7 @@
 #define CUSTOMERACCOUNT_H
 
 #include "Account.h"
+#include "../Order/Order.h"
 
 class CustomerAccount : public Account
 {

@@ -71,7 +71,7 @@
        <item>
         <widget class="QPushButton" name="pushButton">
          <property name="text">
-          <string>PushButton</string>
+          <string>貨物管理</string>
          </property>
         </widget>
        </item>
@@ -91,7 +91,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_2">
          <property name="text">
-          <string>PushButton</string>
+          <string>收取訂單</string>
          </property>
         </widget>
        </item>
@@ -111,7 +111,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_3">
          <property name="text">
-          <string>PushButton</string>
+          <string>登出</string>
          </property>
         </widget>
        </item>

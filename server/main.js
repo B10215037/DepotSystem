@@ -117,7 +117,7 @@ server.post('/login', function(request, response, next) {
                         console.log(request.depotSession.username);
                         response.send(200, {message: "Login successfully, gooby!!"});
                     }else{
-                        response.send(500, {message: "Wrong password, stupid gooby!!"});
+                        response.send(200, {message: "Wrong password, stupid gooby!!"});
                     }
                 }else{
                     response.send(500, {message: "fuck you gooby, this username doesn't exist!!"});
@@ -177,35 +177,8 @@ server.post('/products', function(request, response, next){
                 }else{
                     response.send(400, {message: "fuck you gooby, send the right format!!!"});
                 }
-//                Product.findOne({name: request.params.productname}, function (err, product){
-//                    if(err){
-//                        console.log("error");
-//                        response.send(400, {message: "Sorry gooby!!!, Product Error!!!"});
-//                    }
-//                    if(product){
-//                        response.send(400, {message: "fuck you gooby!!!, this product has already been added!!"});
-//                    }else{
-//                        console.log(request.params.productname);
-//                        if(request.params.productname && request.params.stock && request.params.price){
-//                            var product = new Product({
-//                                name:request.params.productname,
-//                                stock:request.params.stock,
-//                                price:request.params.price
-//                            });
-//                            product.save(function(error){
-//                                if(error){
-//                                    response.send(500, {message: "Sorry gooby, database server is down!!"});
-//                                }else{
-//                                    response.send(200, {message: "Successful, very good gooby, You add a product."});
-//                                }
-//                            });
-//                        }else{
-//                            response.send(500, {message: "fuck you gooby, send the right format!!!"});
-//                        }
-//                    }
-//                });
             }else if(user.type == "customer"){
-                response.send(500, {message: "fuck you gooby, you are not a admin!!!"});
+                response.send(500, {message: "fuck you gooby, you are not an admin!!!"});
             }else{
                 response.send(500, {message: "fuck you gooby, sth wrong in user accounts type!!!"});
             }

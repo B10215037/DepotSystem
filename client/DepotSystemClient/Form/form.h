@@ -11,6 +11,8 @@ public:
         Login = 0,
         CustomerMenu,
         ManagerMenu,
+        ProductManagement,
+        OrderManagement,
         FORM_COUNT
     };
     explicit Form(QWidget *parent = 0);
