@@ -6,10 +6,10 @@
 enum State{stop, sit, stand, walk, run};
 struct Item
 {
-	ProductID product;
+    ProductID product;
 	int amount;
 
-	Item(ProductID p, int num): product(p), amount(num){
+    Item(ProductID p, int num): product(p), amount(num){
 
 	}
 };

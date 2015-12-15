@@ -3,6 +3,7 @@
 
 #include <QtNetwork>
 #include <QJsonObject>
+#include "../Product/Product.h"
 
 class Connector : public QNetworkAccessManager
 {
@@ -11,13 +12,11 @@ class Connector : public QNetworkAccessManager
 public:
     Connector();
 
-    QByteArray getLogInFormat(QString username, QString password);
-
     ///login
-    void logIn(QByteArray jsonData);
+    void logIn(QString userName, QString password);
 
     ///products
-    void postNewProducts(QByteArray jsonData);
+    void postNewProducts(Product *products, int size);
     void getProductsInfo();
     void putEditedProducts(QByteArray jsonData);
 

@@ -7,27 +7,30 @@ Connector::Connector() : QNetworkAccessManager() {
     serverUrl = "http://140.118.175.208";
 }
 
-QByteArray Connector::getLogInFormat(QString username, QString password) {
-    return QString("{\"username\":\"%1\", \"password\":\"%2\"}").arg(username, password).toUtf8();
+///login
+void Connector::logIn(QString userName, QString password) {
+    QString jsonData = QString("{\"username\":\"%1\",\"password\":\"%2\"}").arg(userName, password);
+    post(setRequest("/login", jsonData.size()), jsonData.toUtf8());
 }
 
-///login ---[==========>>>
-void Connector::logIn(QByteArray jsonData) {
-    post(setRequest("/login", jsonData.size()), jsonData);
-}
-//login <<<==========]---
-
-///product ---[==========>>>
-void Connector::postNewProducts(QByteArray jsonData) {
+///product
+void Connector::postNewProducts(Product *products, int size) {
+    QString jsonDataFormat =
+            "{\"oldproductname\":\"%1\",\"newproductname\":\"%2\",\"stock\":\"%3\",\"price\":\"%4\"}",
+            jsonData = "[";
+    for (int i = 0; i < size; i++) {
+        jsonData += jsonDataFormat.arg(products->getName())
+    }
     post(setRequest("/products", jsonData.size()), jsonData);
 }
+
 void Connector::getProductsInfo() {
-    get(setRequest("/products", 0));
+    get(QNetworkRequest(QUrl(serverUrl + "/products")));
 }
+
 void Connector::putEditedProducts(QByteArray jsonData) {
     put(setRequest("/products", jsonData.length()), jsonData);
 }
-//products <<<==========]---
 
 QNetworkRequest Connector::setRequest(QString path, int dataSize) {
     QUrl qurl(serverUrl + path);
@@ -43,8 +46,9 @@ QNetworkRequest Connector::setRequest(QString path, int dataSize) {
 #ifdef HEADER_DEBUG
     QList<QByteArray> headers = request.rawHeaderList();
     for (int i = 0; i < headers.size(); i++)
-        qDebug() << "\n[Connector::setRequest @ HEADER]"
-                 << headers[i] << request.rawHeader(headers[i]);
+        printf("\n[Connector::setRequest @ HEADER] %s %s\n",
+               headers[i].data(), request.rawHeader(headers[i]).data());
+    fflush(stdout);
 #endif
 
     return request;
@@ -71,15 +75,6 @@ void Connector::replyFinished(QNetworkReply* reply) {
 
         response = reply->readAll();
         qDebug() << "\n[Connector::replyFinished @ DATA]" << response;
-
-//        QJsonDocument jsonDoc = QJsonDocument::fromJson(response.toUtf8());
-//        if (jsonDoc.isObject()) {
-//            response = jsonDoc.object()["message"].toString();
-//        }
-//        else if (jsonDoc.isArray()) {
-//            response = jsonDoc.array().size();
-//        }
-
         emit sendReceivedMessage(response);
     }
 }
