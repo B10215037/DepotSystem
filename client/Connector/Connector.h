@@ -16,7 +16,7 @@ public:
     void logIn(QString userName, QString password);
 
     ///products
-    void postNewProducts(Product *products, int size);
+    void postNewProducts(QByteArray jsonData);
     void getProductsInfo();
     void putEditedProducts(QByteArray jsonData);
 

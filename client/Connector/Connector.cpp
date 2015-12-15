@@ -14,13 +14,13 @@ void Connector::logIn(QString userName, QString password) {
 }
 
 ///product
-void Connector::postNewProducts(Product *products, int size) {
-    QString jsonDataFormat =
-            "{\"oldproductname\":\"%1\",\"newproductname\":\"%2\",\"stock\":\"%3\",\"price\":\"%4\"}",
-            jsonData = "[";
-    for (int i = 0; i < size; i++) {
-        jsonData += jsonDataFormat.arg(products->getName())
-    }
+void Connector::postNewProducts(QByteArray jsonData) {
+//    QString jsonDataFormat =
+//            "{\"oldproductname\":\"%1\",\"newproductname\":\"%2\",\"stock\":\"%3\",\"price\":\"%4\"}",
+//            jsonData = "[";
+//    for (int i = 0; i < size; i++) {
+//        jsonData += jsonDataFormat.arg(jsonData->getName())
+//    }
     post(setRequest("/products", jsonData.size()), jsonData);
 }
 
