@@ -2,16 +2,21 @@
 #define Order_H
 
 #include <QString>
+#include <QVector>
+#include "../Product/Product.h"
 
 enum State{stop, sit, stand, walk, run};
 struct Item
 {
-	ProductID product;
+    int product;
 	int amount;
 
-	Item(ProductID p, int num): product(p), amount(num){
+    Item(int p, int num): product(p), amount(num){
 
-	}
+    }
+    Item(){
+
+    }
 };
 
 class Order

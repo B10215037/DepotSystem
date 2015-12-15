@@ -39,7 +39,7 @@ QVector<Item> Order::getItems(){
 }
 
 void Order::addItem(QString name, int amount = 1){
-	ProductID requiredProduct = find(name);
+    ProductID requiredProduct;// = find(name); TODO
 
 	items.append(Item(requiredProduct, amount));
 
@@ -48,7 +48,7 @@ void Order::addItem(QString name, int amount = 1){
 int Order::getItemAmount(QString name){
 	int i = 0, itemSize = items.size();
 	while(i < itemSize){
-		if(getProductWithID(items[i].product).name == name){
+        if(getProductWithID(items[i].product).getName() == name){
 			return items[i].amount;
 		}
 		i++;
@@ -59,7 +59,7 @@ int Order::getItemAmount(QString name){
 void Order::setItemAmount(QString name, int amount){
 	int i = 0, itemSize = items.size();
 	while(i < itemSize){
-		if(getProductWithID(items[i].product).name == name){
+        if(getProductWithID(items[i].product).getName() == name){
 			items[i].amount = amount;
 			break;
 		}
@@ -71,8 +71,8 @@ void Order::deleteItem(QString name){
 	QVectorIterator<Item> iter(items);
 	while (iter.hasNext()){
 		Item tmpItem = iter.next();
-		if(getProductWithID(tmpItem.product).name == name){
-			items.erase(iter.previous());
+        if(getProductWithID(tmpItem.product).getName() == name){
+//            items.erase(iter.previous()); TODO
 			break;
 		}
 	}
@@ -83,7 +83,7 @@ void Order::submit(){
 }
 
 bool Order::isSubmitted(){
-
+    return true; //TODO
 }
 
 QString Order::getWhoOrdered(){

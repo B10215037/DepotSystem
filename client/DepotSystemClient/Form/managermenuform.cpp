@@ -17,3 +17,13 @@ void ManagerMenuForm::on_pushButton_3_clicked()
 {
     changeWindow(ManagerMenu, Login);
 }
+
+void ManagerMenuForm::on_pushButton_clicked()
+{
+    changeWindow(ManagerMenu, ProductManagement);
+}
+
+void ManagerMenuForm::on_pushButton_2_clicked()
+{
+    changeWindow(ManagerMenu, OrderManagement);
+}
