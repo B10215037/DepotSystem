@@ -18,18 +18,21 @@ IP/register
 * 使用:POST
 * 格式:{"username": "dolan", "password":"xyz"}
 
+* void registerAccount(QString userName, QString password);
+
 IP/login
 =====
 * 使用:POST
 * 格式:{"username": "dolan", "password":"xyz"}
 
 * void logIn(QString userName, QString password);
-* connector->logIn("admin", "admin");
 
 IP/logout
 =====
 * 使用:GET
 * 格式:沒有
+
+* void logOut();
 
 IP/products
 =====
@@ -38,7 +41,7 @@ IP/products
 * 格式:{"productname": "toast", "stock":30, "price": 100}
 * 說明:管理員新增一筆產品，stock表示進貨數量，如果新增了一筆已經在資料庫上的商品，會出現錯誤，請使用put更新資料庫
 
-* void postNewProducts(QByteArray jsonData)
+* void postNewProducts(Product *products, int size);
 
 2 使用:GET
 
@@ -52,4 +55,4 @@ IP/products
 * 格式:{"productname": "toast", "stock":30, "price": 100}或{"productname": "toast", "stock":30}或{"productname": "toast", "price":30}
 * 說明:管理員更新一筆產品，stock表示進貨數量，productname必填，stock進貨數量或price價錢選填，進貨數量stock會跟原本的商品數量stock相加
 
-* void putEditedProducts(QByteArray jsonData)
+* void putEditedProducts(Product *products, int size);

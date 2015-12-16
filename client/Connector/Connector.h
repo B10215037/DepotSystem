@@ -12,8 +12,14 @@ class Connector : public QNetworkAccessManager
 public:
     Connector();
 
+    ///register
+    void registerAccount(QString userName, QString password);
+
     ///login
     void logIn(QString userName, QString password);
+
+    ///logout
+    void logOut();
 
     ///products
     void postNewProducts(Product *products, int size);

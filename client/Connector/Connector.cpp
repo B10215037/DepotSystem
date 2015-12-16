@@ -7,10 +7,21 @@ Connector::Connector() : QNetworkAccessManager() {
     serverUrl = "http://140.118.175.208";
 }
 
+///register
+void Connector::registerAccount(QString userName, QString password) {
+    QString jsonData = QString("{\"username\":\"%1\",\"password\":\"%2\"}").arg(userName, password);
+    post(setRequest("/register", jsonData.size()), jsonData.toUtf8());
+}
+
 ///login
 void Connector::logIn(QString userName, QString password) {
     QString jsonData = QString("{\"username\":\"%1\",\"password\":\"%2\"}").arg(userName, password);
     post(setRequest("/login", jsonData.size()), jsonData.toUtf8());
+}
+
+///logout
+void Connector::logOut() {
+    get(QNetworkRequest(QUrl(serverUrl + "/logout")));
 }
 
 ///product
