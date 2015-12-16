@@ -264,7 +264,7 @@ server.get('/orders', function(req, res, next) {
             for (order of user.orders) {
                 Order.findOne({ _id: mongoose.Types.ObjectId(order._id) }, function(err, order) {
                     orders.push(order);
-                })
+                });
             }
             res.send(200, orders);
         });
