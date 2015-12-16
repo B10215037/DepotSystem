@@ -35,4 +35,4 @@ IP/products
 3 使用:PUT(需要cookie，管理員限定，一般使用者無法使用)
 
 * 格式:應OQ要求，後端使用id搜尋，因此可以改商品名字{"id":"xxxxxxxx", "productname": "toast", "stock":30, "price": 100}或{"id":"xxxxxxxx", "productname": "toast", "stock":30}或{"id":"xxxxxxxx", "productname": "toast", "price":30}
-* 說明:管理員更新一筆產品，stock表示進貨數量，productname必填，stock進貨數量或price價錢選填，進貨數量stock會跟原本的商品數量stock相加
+* 說明:管理員更新一筆產品，stock表示進貨數量，id必填，productname商品名字或stock進貨數量或price價錢選填，進貨數量stock會跟原本的商品數量stock相加
