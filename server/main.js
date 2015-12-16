@@ -222,6 +222,8 @@ server.put('/products', function(request, response, next){
                                         response.send(200, {message: "Successful, very good gooby, You update a product."});
                                     }
                                 });
+                            }else{
+                                response.send(500, {message: "fuck you gooby, this product doesn't exist !!"});
                             }
                         }
                     })
