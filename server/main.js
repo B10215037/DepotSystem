@@ -213,26 +213,32 @@ server.put('/products', function(request, response, next){
                                 response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
                             }else{
                                 console.log("product = " + product);
-                                if(product){
-                                    if(item.productname){
-                                        product.name = item.productname;
+                                Product.findOne({name: item.productname}, function (err, productWithNewName) {
+                                    if(productWithNewName){
+                                        response.send(500, {message: "fuck you gooby, use different product name!!"});
+                                        return next();
                                     }
-                                    if(item.stock){
-                                        product.stock = item.stock;
-                                    }
-                                    if(item.price){
-                                        product.price = item.price;
-                                    }
-                                    product.save(function(error) {
-                                        if(error){
-                                            response.send(500, {message: "Sorry gooby, database server is down!!"});
-                                        }else{
-                                            response.send(200, {message: "Successful, very good gooby, You update a product."});
+                                    if(product){
+                                        if(item.productname){
+                                            product.name = item.productname;
                                         }
-                                    });
-                                }else{
-                                    response.send(500, {message: "fuck you gooby, this product doesn't exist !!"});
-                                }
+                                        if(item.stock){
+                                            product.stock = item.stock;
+                                        }
+                                        if(item.price){
+                                            product.price = item.price;
+                                        }
+                                        product.save(function(error) {
+                                            if(error){
+                                                response.send(500, {message: "Sorry gooby, database server is down!!"});
+                                            }else{
+                                                response.send(200, {message: "Successful, very good gooby, You update a product."});
+                                            }
+                                        });
+                                    }else{
+                                        response.send(500, {message: "fuck you gooby, this product doesn't exist !!"});
+                                    }
+                                });
                             }
                         });
                     }else{
