@@ -1,6 +1,6 @@
 #include "Connector.h"
 
-#define HEADER_DEBUG1
+#define HEADER_DEBUG
 
 Connector::Connector() : QNetworkAccessManager() {
     setCookieJar(new QNetworkCookieJar);
@@ -14,13 +14,13 @@ void Connector::logIn(QString userName, QString password) {
 }
 
 ///product
-void Connector::postNewProducts(QByteArray jsonData) {
-//    QString jsonDataFormat =
-//            "{\"oldproductname\":\"%1\",\"newproductname\":\"%2\",\"stock\":\"%3\",\"price\":\"%4\"}",
-//            jsonData = "[";
-//    for (int i = 0; i < size; i++) {
-//        jsonData += jsonDataFormat.arg(jsonData->getName())
-//    }
+void Connector::postNewProducts(Product *products, int size) {
+    QByteArray jsonData = "[";
+    for (int i = 0; i < size; i++)
+        if (i == size - 1) jsonData += products[i].toJson();
+        else jsonData += products[i].toJson() + ",";
+    jsonData += "]";
+    qDebug() << "@@@" << jsonData;
     post(setRequest("/products", jsonData.size()), jsonData);
 }
 
@@ -28,8 +28,14 @@ void Connector::getProductsInfo() {
     get(QNetworkRequest(QUrl(serverUrl + "/products")));
 }
 
-void Connector::putEditedProducts(QByteArray jsonData) {
-    put(setRequest("/products", jsonData.length()), jsonData);
+void Connector::putEditedProducts(Product *products, int size) {
+    QByteArray jsonData = "[";
+    for (int i = 0; i < size; i++)
+        if (i == size - 1) jsonData += products[i].toJson();
+        else jsonData += products[i].toJson() + ",";
+    jsonData += "]";
+    qDebug() << "###" << jsonData;
+    put(setRequest("/products", jsonData.size()), jsonData);
 }
 
 QNetworkRequest Connector::setRequest(QString path, int dataSize) {
@@ -74,7 +80,8 @@ void Connector::replyFinished(QNetworkReply* reply) {
         if(cookies.count() != 0) cookieJar()->setCookiesFromUrl(cookies, reply->request().url());
 
         response = reply->readAll();
-        qDebug() << "\n[Connector::replyFinished @ DATA]" << response;
+        printf("\n[Connector::replyFinished @ DATA] %s\n", response.toUtf8().data());
+        fflush(stdout);
         emit sendReceivedMessage(response);
     }
 }

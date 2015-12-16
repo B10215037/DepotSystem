@@ -16,9 +16,9 @@ public:
     void logIn(QString userName, QString password);
 
     ///products
-    void postNewProducts(QByteArray jsonData);
+    void postNewProducts(Product *products, int size);
     void getProductsInfo();
-    void putEditedProducts(QByteArray jsonData);
+    void putEditedProducts(Product *products, int size);
 
 private:
     QString serverUrl;
