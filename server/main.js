@@ -112,12 +112,12 @@ server.post('/login', function(request, response, next) {
             }else{
                 console.log(" user = " + user);
                 if(user){
-                    if(user.username == request.params.username && user.password == request.params.password){
+                    if(user.username === request.params.username && user.password === request.params.password){
                         request.depotSession.username = user.username;
                         console.log(request.depotSession.username);
                         response.send(200, {message: "Login successfully, gooby!!"});
                     }else{
-                        response.send(200, {message: "Wrong password, stupid gooby!!"});
+                        response.send(500, {message: "Wrong password, stupid gooby!!"});
                     }
                 }else{
                     response.send(500, {message: "fuck you gooby, this username doesn't exist!!"});
