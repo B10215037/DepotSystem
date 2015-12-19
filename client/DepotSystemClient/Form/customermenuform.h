@@ -16,6 +16,9 @@ public:
     explicit CustomerMenuForm(QWidget *parent = 0);
     ~CustomerMenuForm();
 
+signals:
+    void logOutSignal();
+
 private slots:
     void on_pushButton_3_clicked();
 

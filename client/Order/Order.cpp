@@ -15,6 +15,9 @@ typedef unsigned int ProductID;
 // Order getAllOrders(){
 
 // }
+Order::Order() {
+
+}
 
 Product getProductWithID(ProductID id){
 	Product p;

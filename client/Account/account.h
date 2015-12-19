@@ -2,7 +2,6 @@
 #define ACCOUNT_H
 
 #include <QString>
-#include <QVector>
 
 class Account
 {
@@ -11,6 +10,7 @@ protected:
 
 public:
     Account(QString id);
+    QString getId();
 };
 
 #endif // ACCOUNT_H

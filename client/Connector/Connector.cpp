@@ -3,8 +3,11 @@
 #define HEADER_DEBUG
 
 Connector::Connector() : QNetworkAccessManager() {
-    setCookieJar(new QNetworkCookieJar);
+//    setCookieJar(new QNetworkCookieJar);
     serverUrl = "http://140.118.175.208";
+
+//    connect(this, SIGNAL(finished(QNetworkReply*)),
+//            this, SLOT(replyFinished(QNetworkReply*)));
 }
 
 ///register
@@ -14,13 +17,17 @@ void Connector::registerAccount(QString userName, QString password) {
 }
 
 ///login
-void Connector::logIn(QString userName, QString password) {
-    QString jsonData = QString("{\"username\":\"%1\",\"password\":\"%2\"}").arg(userName, password);
+void Connector::logIn(QString username, QString password) {
+    QString jsonData = QString("{\"username\":\"%1\",\"password\":\"%2\"}").arg(username, password);
     post(setRequest("/login", jsonData.size()), jsonData.toUtf8());
 }
 
 ///logout
 void Connector::logOut() {
+    clearAccessCache();
+    QList<QNetworkCookie> cookies = cookieJar()->cookiesForUrl(QUrl(serverUrl + "/login"));
+    for (int i = 0; i < cookies.size(); i++)
+        cookieJar()->deleteCookie(cookies[i]);
     get(QNetworkRequest(QUrl(serverUrl + "/logout")));
 }
 
@@ -56,7 +63,6 @@ QNetworkRequest Connector::setRequest(QString path, int dataSize) {
     request.setHeader(QNetworkRequest::ContentLengthHeader, dataSize);
 
     QList<QNetworkCookie> cookies = cookieJar()->cookiesForUrl(qurl);
-
     for(int i = 0; i < cookies.size(); i++)
         request.setHeader(QNetworkRequest::CookieHeader, QVariant::fromValue(cookies[i]));
 
@@ -71,28 +77,28 @@ QNetworkRequest Connector::setRequest(QString path, int dataSize) {
     return request;
 }
 
-void Connector::replyFinished(QNetworkReply* reply) {
-    reply->deleteLater();
+//void Connector::replyFinished(QNetworkReply* reply) {
+//    reply->deleteLater();
 
-    QString response;
+//    QString response;
 
-    if (reply->error() != QNetworkReply::NoError) {
-        response = reply->errorString() + reply->readAll();
-        qDebug() << "\n[Connector::replyFinished] @ ERROR]" << response;
-        emit sendReceivedMessage(response);
-        return;
-    }
+//    if (reply->error() != QNetworkReply::NoError) {
+//        response = reply->errorString() + reply->readAll();
+//        qDebug() << "\n[UserView::replyFinished] @ ERROR]" << response;
+//        emit sendReceivedMessage(response);
+//        return;
+//    }
 
-    if (reply->isReadable()) {
-        QList<QNetworkCookie> cookies =
-                qvariant_cast< QList<QNetworkCookie> >(reply->header(QNetworkRequest::SetCookieHeader));
-        qDebug() << "\n[Connector::replyFinished] @ COOKIES]" << cookies;
+//    if (reply->isReadable()) {
+//        QList<QNetworkCookie> cookies =
+//                qvariant_cast< QList<QNetworkCookie> >(reply->header(QNetworkRequest::SetCookieHeader));
+//        qDebug() << "\n[UserView::replyFinished] @ COOKIES]" << cookies;
 
-        if(cookies.count() != 0) cookieJar()->setCookiesFromUrl(cookies, reply->request().url());
+//        if(cookies.count() != 0) cookieJar()->setCookiesFromUrl(cookies, reply->request().url());
 
-        response = reply->readAll();
-        printf("\n[Connector::replyFinished @ DATA] %s\n", response.toUtf8().data());
-        fflush(stdout);
-        emit sendReceivedMessage(response);
-    }
-}
+//        response = reply->readAll();
+//        printf("\n[UserView::replyFinished @ DATA] %s\n", response.toUtf8().data());
+//        fflush(stdout);
+//        emit sendReceivedMessage(response);
+//    }
+//}

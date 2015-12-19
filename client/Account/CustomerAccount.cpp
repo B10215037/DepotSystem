@@ -2,15 +2,14 @@
 
 CustomerAccount::CustomerAccount(QString id) : Account(id) {}
 
-QList<Order> CustomerAccount::getOrders() {
-    //連線請求
-    return QList<Order>();//TODO
-}
+//QList<Order> CustomerAccount::getOrders() {
+//    return orders;
+//}
 
-void CustomerAccount::addOrder(QList<Item> items) {
-    //連線請求
-}
+//void CustomerAccount::orderNewOrder(Order item) {
+//    orders.append(item);
+//}
 
-void CustomerAccount::removeOrder(int index) {
-    //連線請求
-}
+//void CustomerAccount::cancelOrDeleteOrder(int index) {
+//    orders.removeAt(index);
+//}

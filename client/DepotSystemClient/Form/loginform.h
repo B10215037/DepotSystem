@@ -5,22 +5,26 @@
 #include "form.h"
 
 namespace Ui {
-class LoginForm;
+class LogInForm;
 }
 
-class LoginForm : public Form
+class LogInForm : public Form
 {
     Q_OBJECT
 
 public:
-    explicit LoginForm(QWidget *parent = 0);
-    ~LoginForm();
+    explicit LogInForm(QWidget *parent = 0);
+    ~LogInForm();
+
+signals:
+    void logInSignal(QString username, QString password);
 
 private slots:
     void on_pushButton_clicked();
+    void showLogInResult(bool failed, QString message);
 
 private:
-    Ui::LoginForm *ui;
+    Ui::LogInForm *ui;
 };
 
 #endif // LOGINFORM_H

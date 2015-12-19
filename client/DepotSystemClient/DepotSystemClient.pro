@@ -16,23 +16,23 @@ include(IncludeClass.pri)
 SOURCES += main.cpp\
 		userview.cpp \
 	Form/form.cpp \
-	Form/loginform.cpp \
 	Form/customermenuform.cpp \
 	Form/managermenuform.cpp \
 	Form/productmanagementform.cpp \
 	Form/ordermanagementform.cpp \
+        Form/LogInForm.cpp
 
 HEADERS += userview.h \
 	Form/form.h \
-	Form/loginform.h \
 	Form/customermenuform.h \
 	Form/managermenuform.h \
 	Form/productmanagementform.h \
-	Form/ordermanagementform.h
+	Form/ordermanagementform.h \
+        Form/LogInForm.h
 
 FORMS   += userview.ui \
-	Form/loginform.ui \
 	Form/customermenuform.ui \
 	Form/managermenuform.ui \
 	Form/productmanagementform.ui \
-	Form/ordermanagementform.ui
+	Form/ordermanagementform.ui \
+        Form/LogInForm.ui

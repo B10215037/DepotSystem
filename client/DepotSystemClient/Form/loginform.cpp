@@ -1,22 +1,33 @@
-#include "loginform.h"
-#include "ui_loginform.h"
+#include "LogInForm.h"
+#include "ui_LogInForm.h"
+#include "userview.h"
 
-LoginForm::LoginForm(QWidget *parent) :
+LogInForm::LogInForm(QWidget *parent) :
     Form(parent),
-    ui(new Ui::LoginForm)
+    ui(new Ui::LogInForm)
 {
     ui->setupUi(this);
 }
 
-LoginForm::~LoginForm()
+LogInForm::~LogInForm()
 {
     delete ui;
 }
 
-void LoginForm::on_pushButton_clicked()
+void LogInForm::on_pushButton_clicked()
 {
-    if (ui->lineEdit->text() == "m")
-        changeWindow(Login, ManagerMenu);
-    else
-        changeWindow(Login, CustomerMenu);
+    emit logInSignal(ui->lineEdit->text(), ui->lineEdit_2->text());
+//    if (ui->lineEdit->text() == "m")
+//        changeWindow(Login, ManagerMenu);
+//    else
+//        changeWindow(Login, CustomerMenu);
+}
+
+void LogInForm::showLogInResult(bool failed, QString message) {
+    if (failed) ui->label_3->setText(message);
+    else {
+        ui->label_3->setText("");
+        if (message == "Admin") emit changeWindow(Login, ManagerMenu);
+        else emit changeWindow(Login, CustomerMenu);
+    }
 }

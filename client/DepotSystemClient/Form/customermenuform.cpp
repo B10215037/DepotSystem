@@ -15,5 +15,6 @@ CustomerMenuForm::~CustomerMenuForm()
 
 void CustomerMenuForm::on_pushButton_3_clicked()
 {
+    emit logOutSignal();
     changeWindow(CustomerMenu, Login);
 }

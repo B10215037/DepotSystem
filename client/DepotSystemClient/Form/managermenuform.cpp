@@ -15,6 +15,7 @@ ManagerMenuForm::~ManagerMenuForm()
 
 void ManagerMenuForm::on_pushButton_3_clicked()
 {
+    emit logOutSignal();
     changeWindow(ManagerMenu, Login);
 }
 
