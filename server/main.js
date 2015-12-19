@@ -134,7 +134,7 @@ server.post('/login', function(request, response, next) {
 
 server.get('/logout', function(request, response, next){
     if(request.depotSession.username){
-        request.depotSession.destroy();
+        request.depotSession.reset();
     }
     response.send(200, {message: "Log out successfully, good gooby"});
     return next();
