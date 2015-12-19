@@ -7,9 +7,9 @@ server.use(restify.bodyParser());
 
 var sessions = require("client-sessions");
 server.use(sessions({
-  cookieName: 'depotSession', // cookie name dictates the key name added to the request object
-  secret: 'DolanGooby', // should be a large unguessable string
-  duration: 3 * 24 * 60 * 60 * 1000 // how long the session will stay valid in ms
+    cookieName: 'depotSession', // cookie name dictates the key name added to the request object
+    secret: 'DolanGooby', // should be a large unguessable string
+    duration: 3 * 24 * 60 * 60 * 1000 // how long the session will stay valid in ms
 }));
 
 var mongoose = require('mongoose');
@@ -115,7 +115,11 @@ server.post('/login', function(request, response, next) {
                     if(user.username === request.params.username && user.password === request.params.password){
                         request.depotSession.username = user.username;
                         console.log(request.depotSession.username);
-                        response.send(200, {message: "Login successfully, gooby!!"});
+                        if( user.type == "admin" ){
+                            response.send(200, {message: "Admin login successfully, gooby!!"});
+                        }else{
+                            response.send(200, {message: "User login successfully, gooby!!"});
+                        }
                     }else{
                         response.send(500, {message: "Wrong password, stupid gooby!!"});
                     }
