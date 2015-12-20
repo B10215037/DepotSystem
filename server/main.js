@@ -304,8 +304,8 @@ server.get('/orders', function(request, response, next)
 })
 
 server.post('/orders', function(request, response, next) {
-    if ( !req.depotSystem.username) {
-        res.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+    if ( !request.depotSystem.username) {
+        request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
         Account.findOne({ username: request.depotSession.username }, function (err, user) {
 
