@@ -288,17 +288,17 @@ server.del('/products', function(request, response, next)
 
 server.get('/orders', function(request, response, next)
 {
-    if (! req.depotSession.username) {
-        res.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+    if (!request.depotSession.username) {
+        request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
         Account.findOne({ username: request.depotSession.username }, function (err, user) {
-            var orders = [];
-            for (order of user.orders) {
-                Order.findOne({ _id: mongoose.Types.ObjectId(order._id) }, function(err, order) {
-                    orders.push(order);
-                });
-            }
-            res.send(200, orders);
+//            var orders = [];
+//            for (order of user.orders) {
+//                Order.findOne({ _id: mongoose.Types.ObjectId(order._id) }, function(err, order) {
+//                    orders.push(order);
+//                });
+//            }
+            response.send(200, user.orders);
         });
     }
 })

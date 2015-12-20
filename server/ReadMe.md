@@ -22,22 +22,31 @@ IP/logout
 
 IP/products
 =====
-1 使用:POST(需要cookie，管理員限定，一般使用者無法使用)
+1. 使用:POST(需要cookie，管理員限定，一般使用者無法使用)
 
 * 格式:[{"productname": "toastA", "stock":30, "price": 100}, {"productname": "toastB", "stock":30, "price": 100}]
 * 說明:管理員新增數筆產品，stock表示進貨數量，如果新增了一筆已經在資料庫上的商品，會出現錯誤，請使用put更新資料庫
 
-2 使用:GET
+2. 使用:GET
 
 * 格式:沒有格式
 * 說明:會回傳所有產品的清單(json)
 
-3 使用:PUT(需要cookie，管理員限定，一般使用者無法使用)
+3. 使用:PUT(需要cookie，管理員限定，一般使用者無法使用)
 
 * 格式:[{"id":"xxxxxxxx", "productname": "toast", "stock":30, "price": 100}, {"id":"xxxxxxxx", "productname": "toastA", "stock":30, "price": 100}]
 * 說明:管理員更新數筆產品，stock表示進貨數量，id必填，productname商品名字或stock進貨數量或price價錢選填
 
-4 使用:DELETE(需要cookie，管理員限定，一般使用者無法使用)
+4. 使用:DELETE(需要cookie，管理員限定，一般使用者無法使用)
 
 * 格式:[{"id":"xxxxxxxx1"}, {"id":"xxxxxxxx2"}]
 * 說明:管理員刪除數筆產品
+
+IP/orders
+=====
+
+1. 使用:GET
+
+* 格式:沒有格式
+* 說明:會回傳所有用戶的所有訂單(json)
+
