@@ -50,3 +50,7 @@ IP/orders
 * 格式:沒有格式
 * 說明:會回傳所有用戶的所有訂單(json)
 
+2. 使用:POST(需要cookie)
+
+* 格式:[{"id":"xxxxxxxx1", "amount":3}, {"id":"xxxxxxxx2", "amount":5}]
+* 說明:用戶新增一筆訂單在他的帳戶裡，產品的剩餘數量會減少，server會計算新訂單的總價錢，使用GET查看訂單和總價錢
