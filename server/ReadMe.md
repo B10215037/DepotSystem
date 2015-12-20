@@ -36,3 +36,8 @@ IP/products
 
 * 格式:[{"id":"xxxxxxxx", "productname": "toast", "stock":30, "price": 100}, {"id":"xxxxxxxx", "productname": "toastA", "stock":30, "price": 100}]
 * 說明:管理員更新數筆產品，stock表示進貨數量，id必填，productname商品名字或stock進貨數量或price價錢選填
+
+4 使用:DELETE(需要cookie，管理員限定，一般使用者無法使用)
+
+* 格式:[{"id":"xxxxxxxx1"}, {"id":"xxxxxxxx2"}]
+* 說明:管理員刪除數筆產品

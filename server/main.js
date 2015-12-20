@@ -22,14 +22,14 @@ var AccountSchema = new Schema({
     password: String,
     orders  : [Schema.Types.ObjectId],
     orders_taken: [Schema.Types.ObjectId],
-    type:String
+    type: String
 });
 
 var OrderSchema = new Schema({
     state: String,
     items: [{
-        product:Schema.Types.ObjectId,
-        amount:Number
+        product: Schema.Types.ObjectId,
+        amount: Number
     }],
     submitted: Boolean,
     ordered_by: [Schema.Types.ObjectId],
@@ -37,9 +37,9 @@ var OrderSchema = new Schema({
 });
 
 var ProductSchema = new Schema({
-    name:String,
-    stock:Number,
-    price:Number
+    name: String,
+    stock: Number,
+    price: Number
 });
 
 //AccountSchema.static('findByUsername', function (name, callback) {
@@ -50,29 +50,27 @@ var Account = mongoose.model('Accounts', AccountSchema);
 var Order   = mongoose.model('Order', OrderSchema);
 var Product = mongoose.model('Product', ProductSchema);
 
-server.pre(function(req, res, next) {
-    req.headers.accept = 'application/json';
+server.pre(function (request, response, next) {
+    request.headers.accept = 'application/json';
     return next();
 });
 
-server.post('/register', function(request, response, next) {
+server.post('/register', function (request, response, next) {
 
     console.log("username = " + request.params.username);
     console.log("password = " + request.params.password);
 
-    if(request.params.username && request.params.password){
+    if (request.params.username && request.params.password) {
         Account.findOne({username: request.params.username}, function (err, user) {
-            if(err)
+            if (err)
             {
                 console.log("error:" + err);
                 response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
-
-            }else{
+            } else {
                 console.log(" user = " + user);
-                if(user){
+                if (user) {
                     response.send(500, {message: "fuck you gooby, this username is already used!!"});
                 }
-
                 else
                 {
                     var newUser = new Account({
@@ -81,9 +79,9 @@ server.post('/register', function(request, response, next) {
                         type:"customer"
                     });
                     newUser.save(function(error){
-                        if(error){
+                        if (error) {
                             response.send(500, {message: "sorry gooby, database server is down!!"});
-                        }else{
+                        } else {
                             response.send(200, {message: "Successful, very good gooby, that's my good dog."});
                         }
                     });
@@ -91,7 +89,7 @@ server.post('/register', function(request, response, next) {
             }
         });
 
-    }else{
+    } else {
         response.send(400, {message: "fuck you gooby, input the right format!!!"});
     }
 
@@ -105,7 +103,7 @@ server.post('/login', function(request, response, next) {
 
     if(request.params.username && request.params.password){
         Account.findOne({username: request.params.username}, function (err, user) {
-            if(err)
+            if (err)
             {
                 console.log("error:" + err);
                 response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
@@ -197,14 +195,16 @@ server.post('/products', function(request, response, next){
     return next();
 });
 
-server.get('/products', function(request, response, next){
+server.get('/products', function(request, response, next)
+{
     Product.find({}, function (err, products) {
         response.send(200, products);
     });
     return next();
 });
 
-server.put('/products', function(request, response, next){
+server.put('/products', function(request, response, next)
+{
     if (!request.depotSession.username) {
         response.send(400, {message: "fuck you gooby!!!, you didn't login or you are not an admin!!"});
     } else {
@@ -261,11 +261,37 @@ server.put('/products', function(request, response, next){
     return next();
 });
 
-server.get('/orders', function(req, res, next) {
+server.del('/products', function(request, response, next)
+{
+    if (!request.depotSession.username) {
+        response.send(400, {message: "fuck you gooby!!!, you didn't login or you are not an admin!!"});
+    } else {
+        Account.findOne({username: request.depotSession.username}, function (err, user) {
+            if(user.type == "admin"){
+                request.params.forEach(function(item)
+                {
+                    if(item.id)
+                    {
+                        Product.findOne({_id: item.id}).remove().exec();
+                    }
+                });
+                response.send(200, {message: "delete successfully, gooby!!!"});
+            } else if (user.type == "customer") {
+                response.send(400, {message: "fuck you gooby, you are not a admin!!!"});
+            } else {
+                response.send(500, {message: "fuck you gooby, sth wrong in user accounts type!!!"});
+            }
+        });
+    }
+    return next();
+});
+
+server.get('/orders', function(request, response, next)
+{
     if (! req.depotSession.username) {
         res.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
-        Account.findOne({ username: req.depotSession.username }, function (err, user) {
+        Account.findOne({ username: request.depotSession.username }, function (err, user) {
             var orders = [];
             for (order of user.orders) {
                 Order.findOne({ _id: mongoose.Types.ObjectId(order._id) }, function(err, order) {
@@ -277,11 +303,11 @@ server.get('/orders', function(req, res, next) {
     }
 })
 
-server.post('/orders', function(req, res, next) {
-    if (! req.depotSystem.username) {
+server.post('/orders', function(request, response, next) {
+    if ( !req.depotSystem.username) {
         res.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
-        Account.findOne({ username: req.depotSession.username }, function (err, user) {
+        Account.findOne({ username: request.depotSession.username }, function (err, user) {
 
         });
     }
