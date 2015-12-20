@@ -301,16 +301,61 @@ server.get('/orders', function(request, response, next)
             response.send(200, user.orders);
         });
     }
-})
+});
 
 server.post('/orders', function(request, response, next) {
-    if ( !request.depotSystem.username) {
-        request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+    if ( !request.depotSession.username) {
+        response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
         Account.findOne({ username: request.depotSession.username }, function (err, user) {
-
+            var totalPrice = 0;
+            if ( request.params.state )
+            {
+                var order = new Order({
+                    state: request.params.state,
+                    price: 0,
+                    items: [],
+                    ordered_by: user.username
+                });
+            } else {
+                response.send(500, {message: "fuck you gooby, wrong format!!!"});
+                return next();
+            }
+            for (item of request.params.items)
+            {
+                if(item.id) {
+                    Product.findOne({_id: item.id}, function (err, product) {
+                        if (!product){
+                            response.send(500, {message: "fuck you gooby, product not found!!!"});
+                        } else {
+                            console.log(item);
+                            product.stock -= item.amount;
+                            totalPrice += item.amount * product.price;
+                            order.items.push({
+                                product: item.id,
+                                amount:  item.amount
+                            });
+                        }
+                    });
+                } else {
+                    response.send(500, {message: "fuck you gooby, wrong format!!!"});
+                }
+            }
+            console.log("totalPrice:" + totalPrice);
+            order.price = totalPrice;
+            order.save(function(error){
+                if(error){
+                    response.send(500, {message: "Sorry gooby, database server is down!!"});
+                }else{
+                    response.send(200, {message: "Successful, very good gooby, You add a order."});
+                }
+            });
+            console.log(order);
+            user.orders.push(order._id);
+            response.send(200, {message: "Add orders successfully, gooby!!!"});
         });
     }
+    return next();
 });
 
 server.listen(80, function() {
