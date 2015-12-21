@@ -56,6 +56,27 @@ void Connector::putEditedProducts(Product *products, int size) {
     put(setRequest("/products", jsonData.size()), jsonData);
 }
 
+///Order
+void Connector::postNewOrders(State s, QVector<Item> items){
+    int size = items.size();
+    //Adding state
+    QByteArray jsonData = "";
+    jsonData += QString("{\"state\":%1,\"items\":").arg(s);
+
+    //Adding items
+    jsonData += "[";
+    for (int i = 0; i < size; i++)
+        if (i == size - 1) jsonData += items[i].toJson();
+        else jsonData += items[i].toJson() + ",";
+    jsonData += "]}";
+    qDebug() << "@@@" << jsonData;
+    post(setRequest("/userOrders", jsonData.size()), jsonData);
+}
+
+void Connector::getOrdersInfo() {
+    get(QNetworkRequest(QUrl(serverUrl + "/userOrders")));
+}
+
 QNetworkRequest Connector::setRequest(QString path, int dataSize) {
     QUrl qurl(serverUrl + path);
     QNetworkRequest request(qurl);

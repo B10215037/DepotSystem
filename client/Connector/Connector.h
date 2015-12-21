@@ -3,6 +3,7 @@
 
 #include <QtNetwork>
 #include "../Product/Product.h"
+#include "../Order/Order.h"
 
 class Connector : public QNetworkAccessManager
 {
@@ -24,6 +25,10 @@ public:
     void postNewProducts(Product *products, int size);
     void getProductsInfo();
     void putEditedProducts(Product *products, int size);
+
+    ///orders
+    void postNewOrders(State, QVector<Item>);
+    void getOrdersInfo();
 
 private:
     QString serverUrl;

@@ -5,17 +5,26 @@
 #include <QVector>
 #include "../Product/Product.h"
 
-enum State{stop, sit, stand, walk, run};
+typedef QString ProductID;
+
+enum State{Archived, Submitted, Processing, Shipping, Arrived};
 struct Item
 {
-    int product;
+    ProductID product;
 	int amount;
 
-    Item(int p, int num): product(p), amount(num){
+    Item(ProductID p, int num): product(p), amount(num){
 
     }
     Item(){
 
+    }
+
+    QString toJson() {
+
+        return QString("{\"id\":\"%1\",\"amount\":%2}")
+                .arg(product).arg(amount);
+        
     }
 };
 
@@ -37,6 +46,8 @@ public:
 	void setWhoOrdered(QString);
 	QString getWhoTaken();
 	void setWhoTaken(QString);
+
+	QString toJson();
 
 private:
 	int number;
