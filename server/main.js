@@ -291,7 +291,7 @@ server.del('/products', function(request, response, next)
 server.get('/userOrders', function(request, response, next)
 {
     if (!request.depotSession.username) {
-        request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+        response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
         Account.findOne({ username: request.depotSession.username }, function (err, user) {
 //            var orders = [];
@@ -378,7 +378,7 @@ server.post('/userOrders', function(request, response, next) {
 server.get('/orders', function(request, response, next)
 {
     if (!request.depotSession.username) {
-        request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+        response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
         Account.findOne({ username: request.depotSession.username }, function (err, user){
             if( user.type != "admin"){
