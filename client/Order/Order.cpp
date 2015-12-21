@@ -1,6 +1,5 @@
 #include "Order.h"
 
-typedef unsigned int ProductID;
 
 // Order getOrder(int num){
 // 	Order tmp;
