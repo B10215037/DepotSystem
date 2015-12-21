@@ -5,22 +5,30 @@
 * dolan2    xyz
 * dolan3    xyz
 
-IP/register
+所有的運送狀態enum
+=====
+* Archived
+* Submitted
+* Processing
+* Shipping
+* Arrived
+
+http://140.118.175.208/register
 =====
 * 使用:POST
 * 格式:{"username": "dolan", "password":"xyz"}
 
-IP/login
+http://140.118.175.208/login
 =====
 * 使用:POST
 * 格式:{"username": "dolan", "password":"xyz"}
 
-IP/logout
+http://140.118.175.208/logout
 =====
 * 使用:GET
 * 格式:沒有
 
-IP/products
+http://140.118.175.208/products
 =====
 1. 使用:POST(需要cookie，管理員限定，一般使用者無法使用)
 
@@ -42,7 +50,7 @@ IP/products
 * 格式:[{"id":"xxxxxxxx1"}, {"id":"xxxxxxxx2"}]
 * 說明:管理員刪除數筆產品
 
-IP/orders
+http://140.118.175.208/orders
 =====
 
 1. 使用:GET
@@ -52,5 +60,5 @@ IP/orders
 
 2. 使用:POST(需要cookie)
 
-* 格式:[{"id":"xxxxxxxx1", "amount":3}, {"id":"xxxxxxxx2", "amount":5}]
+* 格式:{"state": "Shipping","items": [{"id": "566febe0078f5560221a60f5","amount": 3}, {"id": "56710e9395d1572c0525b434","amount": 5}]}
 * 說明:用戶新增一筆訂單在他的帳戶裡，產品的剩餘數量會減少，server會計算新訂單的總價錢，使用GET查看訂單和總價錢
