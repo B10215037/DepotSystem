@@ -309,50 +309,51 @@ server.post('/orders', function(request, response, next) {
     } else {
         Account.findOne({ username: request.depotSession.username }, function (err, user) {
             var totalPrice = 0;
-            if ( request.params.state )
+            if ( !request.params.state )
             {
+                response.send(500, {message: "fuck you gooby, wrong format!!!"});
+                return next();
+            } else {
                 var order = new Order({
                     state: request.params.state,
                     price: 0,
                     items: [],
                     ordered_by: user.username
                 });
-            } else {
-                response.send(500, {message: "fuck you gooby, wrong format!!!"});
-                return next();
-            }
-            for (item of request.params.items)
-            {
-                if(item.id) {
-                    Product.findOne({_id: item.id}, function (err, product) {
-                        if (!product){
-                            response.send(500, {message: "fuck you gooby, product not found!!!"});
-                        } else {
-                            console.log(item);
-                            product.stock -= item.amount;
-                            totalPrice += item.amount * product.price;
-                            order.items.push({
-                                product: item.id,
-                                amount:  item.amount
-                            });
-                        }
-                    });
-                } else {
-                    response.send(500, {message: "fuck you gooby, wrong format!!!"});
+                for (item of request.params.items)
+                {
+                    if(item.id) {
+                        Product.findOne({_id: item.id}, function (err, product) {
+                            if (!product){
+                                response.send(500, {message: "fuck you gooby, product not found!!!"});
+                            } else {
+                                console.log(item);
+                                product.stock -= item.amount;
+                                totalPrice += item.amount * product.price;
+                                order.items.push({
+                                    product: item.id,
+                                    amount:  item.amount
+                                });
+                            }
+                        });
+                    } else {
+                        response.send(500, {message: "fuck you gooby, wrong format!!!"});
+                    }
                 }
+                console.log("totalPrice:" + totalPrice);
+                order.price = totalPrice;
+                order.save(function(error){
+                    if(error){
+                        response.send(500, {message: "Sorry gooby, database server is down!!"});
+                    }else{
+                        response.send(200, {message: "Successful, very good gooby, You add a order."});
+                    }
+                });
+                console.log(order);
+                user.orders.push(order._id);
+                response.send(200, {message: "Add orders successfully, gooby!!!"});
             }
-            console.log("totalPrice:" + totalPrice);
-            order.price = totalPrice;
-            order.save(function(error){
-                if(error){
-                    response.send(500, {message: "Sorry gooby, database server is down!!"});
-                }else{
-                    response.send(200, {message: "Successful, very good gooby, You add a order."});
-                }
-            });
-            console.log(order);
-            user.orders.push(order._id);
-            response.send(200, {message: "Add orders successfully, gooby!!!"});
+
         });
     }
     return next();
