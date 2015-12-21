@@ -11,7 +11,7 @@ server.use(sessions({
     secret: 'DolanGooby', // should be a large unguessable string
     duration: 3 * 24 * 60 * 60 * 1000 // how long the session will stay valid in ms
 }));
-
+var async = require('async');
 var mongoose = require('mongoose');
 var Schema   = mongoose.Schema;
 mongoose.connect('mongodb://localhost/test1');
@@ -32,7 +32,8 @@ var OrderSchema = new Schema({
         amount: Number
     }],
     submitted: Boolean,
-    ordered_by: [Schema.Types.ObjectId],
+    ordered_by: String,
+//    ordered_by: [Schema.Types.ObjectId],
     taken_by: [Schema.Types.ObjectId]
 });
 
@@ -286,7 +287,7 @@ server.del('/products', function(request, response, next)
     return next();
 });
 
-server.get('/orders', function(request, response, next)
+server.get('/userOrders', function(request, response, next)
 {
     if (!request.depotSession.username) {
         request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
@@ -303,57 +304,89 @@ server.get('/orders', function(request, response, next)
     }
 });
 
+server.get('/orders', function(request, response, next)
+{
+    if (!request.depotSession.username) {
+        request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+    } else {
+        Account.findOne({ username: request.depotSession.username }, function (err, user){
+            if( user.type != "admin"){
+                response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+            }
+        });
+        setTimeout(function() {
+            Order.find({}, function (err, orders) {
+                response.send(200, orders);
+            });
+        }, 1000);
+    }
+});
+
 server.post('/orders', function(request, response, next) {
     if ( !request.depotSession.username) {
         response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
-        Account.findOne({ username: request.depotSession.username }, function (err, user) {
-            var totalPrice = 0;
-            if ( !request.params.state )
-            {
-                response.send(500, {message: "fuck you gooby, wrong format!!!"});
-                return next();
-            } else {
-                var order = new Order({
-                    state: request.params.state,
-                    price: 0,
-                    items: [],
-                    ordered_by: user.username
-                });
-                for (item of request.params.items)
-                {
-                    if(item.id) {
-                        Product.findOne({_id: item.id}, function (err, product) {
-                            if (!product){
-                                response.send(500, {message: "fuck you gooby, product not found!!!"});
-                            } else {
-                                console.log(item);
-                                product.stock -= item.amount;
-                                totalPrice += item.amount * product.price;
-                                order.items.push({
-                                    product: item.id,
-                                    amount:  item.amount
-                                });
+        if ( !request.params.state ) {
+            response.send(500, {message: "fuck you gooby, wrong format!!!"});
+            return next();
+        }
+        var totalPrice = 0;
+        var order = new Order({
+            state: request.params.state,
+            price: 0,
+            items: [],
+            ordered_by: request.depotSession.username
+        });
+        async.each(request.params.items,
+            function(item, callback){
+                if(item.id) {
+                    Product.findOne({_id: item.id}, function (err, product) {
+                        if (!product){
+                            response.send(500, {message: "fuck you gooby, product not found!!!"});
+                        } else {
+                            console.log(item);
+                            product.stock -= item.amount;
+                            totalPrice += item.amount * product.price;
+                            order.items.push({
+                                product: item.id,
+                                amount:  item.amount
+                            });
+                        }
+                    });
+                } else {
+                    response.send(500, {message: "fuck you gooby, wrong format!!!"});
+                    return next();
+                }
+                callback();
+        },
+            function(error){
+                if(error){
+                    console.log(error);
+                } else {
+                    setTimeout(function(){
+                        console.log("Done!");
+                        console.log("totalPrice:" + totalPrice);
+                        order.price = totalPrice;
+                        order.save(function(error){
+                            if(error){
+                                response.send(500, {message: "Sorry gooby, database server is down!!"});
+                            }else{
+                                response.send(200, {message: "Successful, very good gooby, You add a order."});
                             }
                         });
-                    } else {
-                        response.send(500, {message: "fuck you gooby, wrong format!!!"});
-                    }
+                        Account.findOne({ username: request.depotSession.username }, function (err, user){
+                            user.orders.push(order._id);
+                            console.log(order);
+                            user.save(function(error){
+                                if(error){
+                                    response.send(500, {message: "Sorry gooby, database server is down!!"});
+                                }else{
+                                    response.send(200, {message: "Successful, very good gooby, You add an order."});
+                                }
+                            });
+                        });
+                    }, 1500);
                 }
-                console.log("totalPrice:" + totalPrice);
-                order.price = totalPrice;
-                order.save(function(error){
-                    if(error){
-                        response.send(500, {message: "Sorry gooby, database server is down!!"});
-                    }else{
-                        response.send(200, {message: "Successful, very good gooby, You add a order."});
-                    }
-                });
-                console.log(order);
-                user.orders.push(order._id);
-                response.send(200, {message: "Add orders successfully, gooby!!!"});
-            }
-
         });
     }
     return next();
