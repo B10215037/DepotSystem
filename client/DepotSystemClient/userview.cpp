@@ -7,21 +7,31 @@ UserView::UserView(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    //LogInForm
     setForm(Form::Login, new LogInForm(this));
     connect((LogInForm*) forms[0], SIGNAL(logInSignal(QString,QString)),
             this, SLOT(logInSlot(QString,QString)));
-    connect(this, SIGNAL(logInResult(bool,QString)),
-            (LogInForm*) forms[0], SLOT(showLogInResult(bool,QString)));
+    connect(this, SIGNAL(logInResult(QString)),
+            (LogInForm*) forms[0], SLOT(showLogInResult(QString)));
 
+    //CustomerMenu
     setForm(Form::CustomerMenu, new CustomerMenuForm(this));
     connect((CustomerMenuForm*) forms[1], SIGNAL(logOutSignal()),
             this, SLOT(logOutSlot()));
 
+    //ManagerMenu
     setForm(Form::ManagerMenu, new ManagerMenuForm(this));
+    connect((ManagerMenuForm*) forms[2], SIGNAL(getProductsInfoSignal()),
+            this, SLOT(getProductsInfoSlot()));
     connect((ManagerMenuForm*) forms[2], SIGNAL(logOutSignal()),
-            this, SLOT(logOutSlot()));
+                this, SLOT(logOutSlot()));
 
+    //ProductManagement
     setForm(Form::ProductManagement, new ProductManagementForm(this));
+    connect(this, SIGNAL(productManagementResult(QList<Product>)),
+            (ProductManagementForm*) forms[3], SLOT(showProductManagementResult(QList<Product>)));
+
+    //OrderManagement
     setForm(Form::OrderManagement, new OrderManagementForm(this));
     forms[Form::Login]->show();
 
@@ -50,12 +60,14 @@ void UserView::replyFinished(QNetworkReply* reply) {
 
     if (reply->error() != QNetworkReply::NoError) {
         response = reply->readAll();
-//        qDebug() << "\n[UserView::replyFinished] @ ERROR]" << reply->errorString() << response;
+        qDebug() << "\n[UserView::replyFinished] @ ERROR]" << reply->errorString() << response;
 
         QJsonObject object = QJsonDocument::fromJson(response.toUtf8()).object();
         switch (whichFormCallIndex) {
-        case 0:
-            emit logInResult(true, object["message"].toString());
+        case Form::Login:
+            emit logInResult(reply->errorString() + "\n" + object["message"].toString());
+            break;
+        case Form::CustomerMenu:
             break;
         default:
             break;
@@ -73,36 +85,69 @@ void UserView::replyFinished(QNetworkReply* reply) {
         fflush(stdout);
 
         QJsonObject object = QJsonDocument::fromJson(response.toUtf8()).object();
-        user = new Account(tempUsername);
         switch (whichFormCallIndex) {
-        case 0:
-            emit logInResult(false, object["message"].toString().split(" ")[0]);
+        case Form::Login:
+            if (object["message"].toString().split(" ")[0] == "Admin") {
+                emit changeWindow(Form::Login, Form::ManagerMenu);
+                userName = "Admin:" + userName;
+            }
+            else {
+                userName = "User:" + userName;
+                emit changeWindow(Form::Login, Form::CustomerMenu);
+            }
+            emit logInResult("");
             break;
+        case Form::CustomerMenu: {
+            QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
+            QList<Product> products;
+            for (int i = 0; i < array.size(); i++) {
+                Product product(array[i].toObject()["_id"].toString());
+                product.setName(array[i].toObject()["name"].toString());
+                product.setStock(array[i].toObject()["stock"].toInt());
+                product.setPrice(array[i].toObject()["price"].toInt());
+                products.append(product);
+            }
+            emit productManagementResult(products);
+            break;
+        }
         default:
             break;
         }
     }
 }
 
-void UserView::logInSlot(QString username, QString password) {
+void UserView::showLoadingDialog() {
     setEnabled(false);
     QDialog *dialog = new QDialog(this, Qt::CustomizeWindowHint);
     QLabel *content = new QLabel("Loading..." ,dialog);
-    widgetsRecycleList.append(content);
-    widgetsRecycleList.append(dialog);
-    dialog->setEnabled(false);
     dialog->show();
 
-    whichFormCallIndex = 0;
-    tempUsername = username;
+    widgetsRecycleList.append(content);
+    widgetsRecycleList.append(dialog);
+}
+
+void UserView::logInSlot(QString username, QString password) {
+    showLoadingDialog();
+
+    whichFormCallIndex = Form::Login;
+    userName = username;
 
     connector->logIn(username, password);
 }
 
 void UserView::logOutSlot() {
-    whichFormCallIndex = 1;
+    whichFormCallIndex = -1;
 
     connector->logOut();
+}
+
+void UserView::getProductsInfoSlot() {
+    showLoadingDialog();
+
+    if (userName.at(0) == 'A') whichFormCallIndex = Form::ManagerMenu;
+    else whichFormCallIndex = -1;
+
+    connector->getProductsInfo();
 }
 
 void UserView::resizeEvent(QResizeEvent* event)

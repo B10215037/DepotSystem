@@ -36,14 +36,15 @@ protected:
 private:
     Ui::UserView *ui;
     Form *forms[Form::FORM_COUNT];
-
     QList<QWidget*> widgetsRecycleList;
     bool whichFormCallIndex;
-    QString tempUsername;
-    Account *user;
+    QString userName;
+
+    void showLoadingDialog();
 
 signals:
-    void logInResult(bool failed,QString message);
+    void logInResult(QString message);
+    void productManagementResult(QList<Product> products);
 
 private slots:
     void changeWindow(int from, int to);
@@ -51,6 +52,7 @@ private slots:
     void replyFinished(QNetworkReply* reply);
     void logInSlot(QString username, QString password);
     void logOutSlot();
+    void getProductsInfoSlot();
 };
 
 #endif // USERVIEW_H

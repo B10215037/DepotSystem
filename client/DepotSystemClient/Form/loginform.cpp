@@ -17,17 +17,8 @@ LogInForm::~LogInForm()
 void LogInForm::on_pushButton_clicked()
 {
     emit logInSignal(ui->lineEdit->text(), ui->lineEdit_2->text());
-//    if (ui->lineEdit->text() == "m")
-//        changeWindow(Login, ManagerMenu);
-//    else
-//        changeWindow(Login, CustomerMenu);
 }
 
-void LogInForm::showLogInResult(bool failed, QString message) {
-    if (failed) ui->label_3->setText(message);
-    else {
-        ui->label_3->setText("");
-        if (message == "Admin") emit changeWindow(Login, ManagerMenu);
-        else emit changeWindow(Login, CustomerMenu);
-    }
+void LogInForm::showLogInResult(QString message) {
+    ui->label_3->setText(message);
 }
