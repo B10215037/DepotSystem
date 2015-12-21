@@ -28,6 +28,10 @@ UserView::UserView(QWidget *parent) :
     connector = new Connector();
     connect(connector, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(replyFinished(QNetworkReply*)));
+
+    setForm(Form::CheckOrder, new CheckOrderForm(this));
+    setForm(Form::ConfirmOrder, new ConfirmOrderForm(this));
+    setForm(Form::SingleOrder, new SingleOrderForm(this));
 }
 
 UserView::~UserView()

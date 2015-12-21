@@ -9,6 +9,9 @@
 #include "Form/managermenuform.h"
 #include "Form/productmanagementform.h"
 #include "Form/ordermanagementform.h"
+#include "Form/checkorderform.h"
+#include "Form/confirmorderform.h"
+#include "Form/singleorderform.h"
 #include "../Connector/Connector.h"
 #include <QDialog>
 #include <QLabel>

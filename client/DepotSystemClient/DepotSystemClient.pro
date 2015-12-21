@@ -20,7 +20,10 @@ SOURCES += main.cpp\
 	Form/managermenuform.cpp \
 	Form/productmanagementform.cpp \
 	Form/ordermanagementform.cpp \
-        Form/LogInForm.cpp
+        Form/LogInForm.cpp \
+    Form/checkorderform.cpp \
+    Form/singleorderform.cpp \
+    Form/confirmorderform.cpp
 
 HEADERS += userview.h \
 	Form/form.h \
@@ -28,11 +31,17 @@ HEADERS += userview.h \
 	Form/managermenuform.h \
 	Form/productmanagementform.h \
 	Form/ordermanagementform.h \
-        Form/LogInForm.h
+        Form/LogInForm.h \
+    Form/checkorderform.h \
+    Form/singleorderform.h \
+    Form/confirmorderform.h
 
 FORMS   += userview.ui \
 	Form/customermenuform.ui \
 	Form/managermenuform.ui \
 	Form/productmanagementform.ui \
 	Form/ordermanagementform.ui \
-        Form/LogInForm.ui
+        Form/LogInForm.ui \
+    Form/checkorderform.ui \
+    Form/singleorderform.ui \
+    Form/confirmorderform.ui

@@ -13,6 +13,9 @@ public:
         ManagerMenu,
         ProductManagement,
         OrderManagement,
+        CheckOrder,
+        ConfirmOrder,
+        SingleOrder,
         FORM_COUNT
     };
     explicit Form(QWidget *parent = 0);

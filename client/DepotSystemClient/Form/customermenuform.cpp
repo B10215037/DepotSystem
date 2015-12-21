@@ -18,3 +18,13 @@ void CustomerMenuForm::on_pushButton_3_clicked()
     emit logOutSignal();
     changeWindow(CustomerMenu, Login);
 }
+
+void CustomerMenuForm::on_pushButton_clicked()
+{
+    changeWindow(CustomerMenu, SingleOrder);
+}
+
+void CustomerMenuForm::on_pushButton_2_clicked()
+{
+    changeWindow(CustomerMenu, CheckOrder);
+}
