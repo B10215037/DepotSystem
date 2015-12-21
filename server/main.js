@@ -1,6 +1,7 @@
 //db.getCollectionNames()
 //db.accounts.find()
 //db.products.remove({"name":"toastA"})
+//db.orders.drop()
 var restify  = require('restify');
 var server   = restify.createServer();
 server.use(restify.bodyParser());
@@ -304,25 +305,7 @@ server.get('/userOrders', function(request, response, next)
     }
 });
 
-server.get('/orders', function(request, response, next)
-{
-    if (!request.depotSession.username) {
-        request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
-    } else {
-        Account.findOne({ username: request.depotSession.username }, function (err, user){
-            if( user.type != "admin"){
-                response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
-            }
-        });
-        setTimeout(function() {
-            Order.find({}, function (err, orders) {
-                response.send(200, orders);
-            });
-        }, 1000);
-    }
-});
-
-server.post('/orders', function(request, response, next) {
+server.post('/userOrders', function(request, response, next) {
     if ( !request.depotSession.username) {
         response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
     } else {
@@ -390,6 +373,24 @@ server.post('/orders', function(request, response, next) {
         });
     }
     return next();
+});
+
+server.get('/orders', function(request, response, next)
+{
+    if (!request.depotSession.username) {
+        request.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+    } else {
+        Account.findOne({ username: request.depotSession.username }, function (err, user){
+            if( user.type != "admin"){
+                response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
+            }
+        });
+        setTimeout(function() {
+            Order.find({}, function (err, orders) {
+                response.send(200, orders);
+            });
+        }, 1000);
+    }
 });
 
 server.listen(80, function() {
