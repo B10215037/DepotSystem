@@ -58,3 +58,13 @@ GET /logout --cookie
     * 格式：{ "items": [{ "productId": "ID_STRING", "amount": "NUMBER" }] }
     * 說明：用戶新增一筆訂單在他的帳戶裡。產品的剩餘數量會減少。SERVER 會計算總價錢並回傳。
     * 回傳格式：{ "total": "NUMBER" }
+
+3. PUT --cookie
+
+    * 格式：[{ "id": "ID", "state": "ENUM", "taken_by": "STRING", "items": [{ "productId": "ID", "amount": "NUMBER" }] }]
+    * 說明：id 是必要的，除此之外都是選填。如果要更新 items，請將整個情形帶入，而非僅寫入有改變的。
+
+4. DELETE --cookie
+
+    * 格式：[{ "id": "ID" }]
+    * 說明：只有當訂單還未送出時才能刪除，並且必須是由下訂單的人才能執行。

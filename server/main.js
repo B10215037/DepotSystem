@@ -28,7 +28,6 @@ var OrderSchema = new Schema({
         product: Schema.Types.ObjectId,
         amount: Number
     }],
-    submitted: Boolean,
     ordered_by: String,
     taken_by: String
 });
@@ -144,6 +143,7 @@ server.put('/products', checkLoginned, checkAdmin, function(req, res, next) {
                 if (item.price) product.price = item.price;
                 product.save(function(err) {
                     if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                    saved++
                     if (++saved == req.params.length) res.send(200);
                 });
             });
@@ -229,6 +229,60 @@ server.post('/orders', checkLoginned, function(req, res, next) {
             });
         });
     });
+});
+
+server.put('/orders', checkLoginned, function(req, res, next) {
+    for (let order of req.params) if (! order.id) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+    Account.findOne({ username: req.depotSession.username }, function(err, user) {
+        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+        if (! user) return next(new restify.BadRequestError('USER NOT EXISTED'));
+
+        let saved = 0;
+        for (let order of req.params) {
+            Order.findOne({ _id: order.id }, function(err, o) {
+                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                if (! o) return next(new restify.BadRequestError('ORDER NOT EXISTED'));
+                
+                if (o.ordered_by == req.depotSession.username) {
+                    if (o.state != 'archived' && order.items) return next(new restify.ForbiddenError('UPDATE ITEMS NOT ALLOWED'));
+                    
+                    o.items = order.items;
+                }
+                if (order.taken_by == req.depotSession.username) {
+                    if (user.type != 'admin') return next(new restify.ForbiddenError('ONLY ADMIN CAN TAKE ORDER'));
+                    if (order.items && o.ordered_by != req.depotSession.username && o.state != 'archived')
+                        return next(new restify.ForbiddenError('UPDATE ITEMS NOT ALLOWED'));
+
+                    o.taken_by = order.taken_by;
+                    o.state = order.state;
+                }
+
+                o.save(function(err) {
+                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                    if (++saved == req.params.length) res.send(200);
+                })
+            });
+        }
+    })
+});
+
+server.del('/orders', function(err, user) {
+    for (let order of req.params) if (! order.id) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+    let removed = 0
+    for (let order of req.params) {
+        Order.findOne({ _id: order.id }, function(err, order) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+            if (order.state != 'archived') return next(new restify.ForbiddenError('HAVE SUBMITTED'));
+            if (order.ordered_by != req.depotSession.username) return next(new restify.ForbiddenError('NOT YOUR ORDER'));
+
+            order.remove(function(err) {
+                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                if (++removed == req.params.length) res.send(200);
+            });
+        });
+    }
 });
 
 server.listen(80);
