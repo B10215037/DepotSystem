@@ -1,9 +1,6 @@
-//db.getCollectionNames()
-//db.accounts.find()
-//db.products.remove({"name":"toastA"})
-//db.orders.drop()
-var restify  = require('restify');
-var server   = restify.createServer();
+'use strict';
+var restify = require('restify');
+var server = restify.createServer();
 server.use(restify.bodyParser());
 
 var sessions = require("client-sessions");
@@ -12,10 +9,10 @@ server.use(sessions({
     secret: 'DolanGooby',
     duration: 3 * 24 * 60 * 60 * 1000
 }));
-var async = require('async');
+
 var mongoose = require('mongoose');
-var Schema   = mongoose.Schema;
-mongoose.connect('mongodb://localhost/test1');
+var Schema = mongoose.Schema;
+mongoose.connect('mongodb://admin:admin@ds056688.mongolab.com:56688/depot');
 
 var AccountSchema = new Schema({
     username: String,
@@ -33,8 +30,7 @@ var OrderSchema = new Schema({
     }],
     submitted: Boolean,
     ordered_by: String,
-//    ordered_by: [Schema.Types.ObjectId],
-    taken_by: Schema.Types.ObjectId
+    taken_by: String
 });
 
 var ProductSchema = new Schema({
@@ -43,12 +39,8 @@ var ProductSchema = new Schema({
     price: Number
 });
 
-//AccountSchema.static('findByUsername', function (name, callback) {
-//    return this.find({ username: name }, callback);
-//});
-
 var Account = mongoose.model('Accounts', AccountSchema);
-var Order   = mongoose.model('Order', OrderSchema);
+var Order = mongoose.model('Order', OrderSchema);
 var Product = mongoose.model('Product', ProductSchema);
 
 server.pre(function (req, res, next) {
@@ -122,120 +114,121 @@ server.post('/products', checkLoginned, checkAdmin, function(req, res, next) {
             if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
             if (product) return next(new restify.ForbiddenError('PRODUCT DEFINED'));
             
-            var product = new Product({
-                name: item.productname,
+            product = new Product({
+                name: item.name,
                 stock: item.stock,
                 price: item.price
             });
             product.save(function(err) {
                 if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                saved++;
+                if (++saved == req.params.length) res.send(200);
             });
         });
     }
-    while (saved != req.params.length) continue;
-    res.send(200);
 });
-
 
 server.put('/products', checkLoginned, checkAdmin, function(req, res, next) {
     let saved = 0;
-    let escape = false;
     for (let item of req.params) {
-        if (escape) break;
         if (! item.id) return next(new restify.BadRequestError('WRONG FORMAT'));
 
         Product.findOne({ _id: item.id }, function(err, product) {
-            if (err) escape = true; return next(new restify.InternalServerError('DATABASE ERROR'));
-            if (! product) escape = true; return next(new restify.BadRequest('PRODUCT NOT EXISTED'));
-            Product.findOne({ name: item.name }, function(err, existed) {
-                if (existed) return next(new restify.ForbiddenError('PRODUCT NAME EXISTED')); escape = true;
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+            if (! product) return next(new restify.BadRequest('PRODUCT NOT EXISTED'));
+
+            Product.findOne({ name: item.name }, function(err, product) {
+                if (product) return next(new restify.ForbiddenError('PRODUCT NAME EXISTED'));
             
                 if (item.name) product.name = item.name;
                 if (item.stock) product.stock = item.stock;
                 if (item.price) product.price = item.price;
                 product.save(function(err) {
-                    if (err) return next(new restify.InternalServerError('DATABASE ERROR')); escape = true;
+                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                    if (++saved == req.params.length) res.send(200);
                 });
             });
         });
     }
-    while (! escape && saved != req.params.length) continue;
-    if (! escape) res.send(200);
 });
 
 server.del('/products', checkLoginned, checkAdmin, function(req, res, next) {
     req.params.forEach(function(product) {
         if (product.id) {
             Product.findOne({ _id: product.id }).remove().exec();
+            res.send(200);
         }
     });
-    res.send(200);
 });
 
-server.get('/orders', checkLoginned, function(req, res, next) {
+server.get('/orders', checkLoginned, function(req, res, next) { 
     Account.findOne({ username: req.depotSession.username }, function(err, user) {
         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
         if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
 
         var response = {};
         Account.findOne({ username: req.depotSession.username }, function(err, user) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+            
             response.MY_ORDERS = user.orders;
-        });
-        if (user.type == 'customer') {
-            res.send(200, response);
-        } else if (user.type == 'admin') {
-            response.I_TAKE = [];
-            response.NOT_TAKEN = [];
-            Order.find({}, function(err, orders) {
-                for (let order of orders) {
-                    if (! order.taken_by) response.NOT_TAKEN.push(order);
-                    if (order.taken_by == user._id) response.I_TAKE.push(order);
-                }
+            if (user.type == 'customer') {
                 res.send(200, response);
-            });
-        }
+            } else if (user.type == 'admin') {
+                response.I_TAKE = [];
+                response.NOT_TAKEN = [];
+                Order.find({}, function(err, orders) {
+                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                    for (let order of orders) {
+                        if (! order.taken_by) response.NOT_TAKEN.push(order._id);
+                        if (order.taken_by == user.username) response.I_TAKE.push(order._id);
+                    }
+                    res.send(200, response);
+                });
+            }
+        });
     });
 });
 
 server.post('/orders', checkLoginned, function(req, res, next) {
-    for (let item of req.params) if (! item.id) return next(new restify.BadRequestError('WRONG FORMAT'));
+    for (let item of req.params) if (! item.productId) return next(new restify.BadRequestError('WRONG FORMAT'));
 
-    var escape = false;
     var total = 0;
     var items = [];
 
     req.params.forEach(function (item) {
-        Product.findOne({ _id: item.id }, function(err, product) {
-            if (err) escape = true; return next(new restify.InternalServerError('DATABASE ERROR'));
-            if (! product) escape = true; return next(new restify.BadRequestError('PRODUCT NOT EXISTED'));
-            if (product.stock < item.amount) escape = true; return next(new restify.Forbidden('STOCK NOT AVAILABLE'));
+        Product.findOne({ _id: item.productId }, function(err, product) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+            if (! product) return next(new restify.BadRequestError('PRODUCT NOT EXISTED'));
+            if (product.stock < item.amount) return next(new restify.Forbidden('STOCK NOT AVAILABLE'));
             
             product.stock -= item.amount;
-            total += item.amount * product.price;
-            items.push({
-                product: item.productId,
-                amount: item.amount
+            product.save(function(err) {
+                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                total += item.amount * product.price;
+                items.push({
+                    product: item.productId,
+                    amount: item.amount
+                });
+
+                if (items.length == req.params.length) {
+                    var order = new Order({
+                        state: 'archived',
+                        items: items,
+                        ordered_by: req.depotSession.username
+                    });
+                    order.save(function(err) {
+                        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                        Account.findOne({ username: req.depotSession.username }, function(err, user) {
+                            user.orders.push(order._id);
+                            user.save(function(err) {
+                                if (err) return next(new restify.InternalServerError("DATABASE ERROR"));
+                                res.send(200, { total: total });
+                            });
+                        });
+                    })
+                }
             });
         });
     });
-
-    while (! escape && items.length != req.params.length) continue;
-    if (! escape) {
-        var order = new Order({
-            state: 'archived',
-            items: items,
-            ordered_by: req.depotSession.username
-        });
-        Account.findOne({ username: req.depotSession.username }, function(err, user) {
-            user.orders.push(order._id);
-            user.save(function(err) {
-                if (err) return next(new restify.InternalServerError("DATABASE ERROR"));
-                res.send(200);
-            });
-        });
-    }
 });
-
 
 server.listen(80);
