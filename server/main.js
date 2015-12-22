@@ -98,6 +98,12 @@ server.get('/logout', checkLoginned, function(req, res, next) {
     res.send(200);
 });
 
+server.get('/products/:id', function(req, res, next) {
+    Product.findOne({ _id: req.params.id }, function(err, product) {
+        res.send(200, product);
+    });
+});
+
 server.get('/products', function(req, res, next) {
     Product.find({}, function(err, products) {
         res.send(200, products);
@@ -160,6 +166,21 @@ server.del('/products', checkLoginned, checkAdmin, function(req, res, next) {
     });
 });
 
+server.get('/orders/:id', checkLoginned, function(req, res, next) {
+    Account.findOne({ username: req.depotSession.username }, function(err, user) {
+        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+        if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
+        if (order.ordered_by != req.depotSession.username && order.taken_By != req.depotSession.username && user.type != 'admin')
+            return next(new restify.ForbiddenError('NOT YOUR ORDER'));
+
+        Order.findOne({ _id: req.params.id }, function(err, order) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+            res.send(200, order);
+        });
+    });
+});
+
 server.get('/orders', checkLoginned, function(req, res, next) { 
     Account.findOne({ username: req.depotSession.username }, function(err, user) {
         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
@@ -168,18 +189,27 @@ server.get('/orders', checkLoginned, function(req, res, next) {
         var response = {};
         Account.findOne({ username: req.depotSession.username }, function(err, user) {
             if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-            
-            response.MY_ORDERS = user.orders;
+
+            response.MY_ORDERS = [];
             if (user.type == 'customer') {
-                res.send(200, response);
+                let got = 0;
+                for (let orderId of user.orders) {
+                    Order.findOne({ _id: orderId }, function(err, order) {
+                        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+                        response.MY_ORDERS.push(order);
+                        if (++got == user.orders.length) res.send(200, response);
+                    })
+                }
             } else if (user.type == 'admin') {
                 response.I_TAKE = [];
                 response.NOT_TAKEN = [];
                 Order.find({}, function(err, orders) {
                     if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
                     for (let order of orders) {
-                        if (! order.taken_by) response.NOT_TAKEN.push(order._id);
-                        if (order.taken_by == user.username) response.I_TAKE.push(order._id);
+                        if (order.ordered_by == user.username) response.MY_ORDERS.push(order);
+                        if (! order.taken_by) response.NOT_TAKEN.push(order);
+                        if (order.taken_by == user.username) response.I_TAKE.push(order);
                     }
                     res.send(200, response);
                 });

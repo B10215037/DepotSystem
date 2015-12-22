@@ -30,6 +30,10 @@ GET /logout --cookie
 
     * 說明：回傳所有產品的清單
 
+2. GET /products/:id
+
+    * 說明：可以拿單獨 id 查詢
+
 2. POST --cookie（管理員限定）
 
     * 格式：[{ "name": "STRING", "stock": "NUMBER", "price": "NUMBER"}]
@@ -52,6 +56,10 @@ GET /logout --cookie
 
     * 說明：回傳用戶的所有訂單。如果是管理員，還會回傳負責的訂單及尚未處理的訂單。
     * 回傳格式：if admin => { "MY_ORDERS": ["ID"], "NOT_TAKEN": ["ID"], "I_TAKE": ["ID"] } or { "MY_ORDERS": ["ID"] }
+
+2. GET /orders/:id --cookie
+
+    * 說明：可以拿單獨 id 查詢。但如果使用者與該訂單無關則會被回絕。
 
 2. POST --cookie
 
