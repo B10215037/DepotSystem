@@ -154,6 +154,9 @@
        <property name="text">
         <string>登入</string>
        </property>
+       <property name="shortcut">
+        <string>Return</string>
+       </property>
       </widget>
      </item>
      <item>

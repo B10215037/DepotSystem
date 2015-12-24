@@ -87,7 +87,7 @@ server.post('/login', function(req, res, next) {
         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
         if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
         if (user.password != req.params.password) return next(new restify.UnauthorizedError('WRONG PASSWORD'));
-        
+
         req.depotSession.username = req.params.username;
         if(user.type == "admin") {
             res.send(200, {message: "Admin"});
@@ -123,7 +123,7 @@ server.post('/products', checkLoginned, checkAdmin, function(req, res, next) {
         Product.findOne({ name: item.name }, function(err, product) {
             if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
             if (product) return next(new restify.ForbiddenError('PRODUCT DEFINED'));
-            
+
             product = new Product({
                 name: item.name,
                 stock: item.stock,
@@ -148,13 +148,12 @@ server.put('/products', checkLoginned, checkAdmin, function(req, res, next) {
 
             Product.findOne({ name: item.name }, function(err, product) {
                 if (product) return next(new restify.ForbiddenError('PRODUCT NAME EXISTED'));
-            
+
                 if (item.name) product.name = item.name;
                 if (item.stock) product.stock = item.stock;
                 if (item.price) product.price = item.price;
                 product.save(function(err) {
                     if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                    saved++
                     if (++saved == req.params.length) res.send(200);
                 });
             });
@@ -186,7 +185,7 @@ server.get('/orders/:id', checkLoginned, function(req, res, next) {
     });
 });
 
-server.get('/orders', checkLoginned, function(req, res, next) { 
+server.get('/orders', checkLoginned, function(req, res, next) {
     Account.findOne({ username: req.depotSession.username }, function(err, user) {
         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
         if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
@@ -234,7 +233,7 @@ server.post('/orders', checkLoginned, function(req, res, next) {
             if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
             if (! product) return next(new restify.BadRequestError('PRODUCT NOT EXISTED'));
             if (product.stock < item.amount) return next(new restify.Forbidden('STOCK NOT AVAILABLE'));
-            
+
             product.stock -= item.amount;
             product.save(function(err) {
                 if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
@@ -278,10 +277,10 @@ server.put('/orders', checkLoginned, function(req, res, next) {
             Order.findOne({ _id: order.id }, function(err, o) {
                 if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
                 if (! o) return next(new restify.BadRequestError('ORDER NOT EXISTED'));
-                
+
                 if (o.ordered_by == req.depotSession.username) {
                     if (o.state != 'archived' && order.items) return next(new restify.ForbiddenError('UPDATE ITEMS NOT ALLOWED'));
-                    
+
                     o.items = order.items;
                 }
                 if (order.taken_by == req.depotSession.username) {

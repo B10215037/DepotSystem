@@ -21,7 +21,7 @@ signals:
 
 private slots:
     void on_pushButton_clicked();
-    void showLogInResult(bool failed, QString message);
+    void showLogInResult(QString message);
 
 private:
     Ui::LogInForm *ui;

@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include "form.h"
+#include <QStandardItemModel>
+#include "../Product/product.h"
 
 namespace Ui {
 class ProductManagementForm;
@@ -18,8 +20,9 @@ public:
 
 private slots:
     void on_pushButton_clicked();
-
     void on_pushButton_2_clicked();
+
+    void showProductManagementResult(QList<Product> products);
 
 private:
     Ui::ProductManagementForm *ui;
