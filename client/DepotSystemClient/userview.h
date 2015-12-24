@@ -50,6 +50,7 @@ signals:
 
 private slots:
     void changeWindow(int from, int to);
+    void showMessage(const QString &text, int timeout);
 
     void replyFinished(QNetworkReply* reply);
     void logInSlot(QString username, QString password);

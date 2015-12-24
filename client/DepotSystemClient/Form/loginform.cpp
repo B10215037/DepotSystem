@@ -24,7 +24,10 @@ void LogInForm::on_pushButton_clicked()
 }
 
 void LogInForm::showLogInResult(bool failed, QString message) {
-    if (failed) ui->label_3->setText(message);
+    if (failed) {
+//        ui->label_3->setText(message);
+        emit showMessage(message, 10000);
+    }
     else {
         ui->label_3->setText("");
         if (message == "Admin") emit changeWindow(Login, ManagerMenu);
