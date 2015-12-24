@@ -89,7 +89,11 @@ server.post('/login', function(req, res, next) {
         if (user.password != req.params.password) return next(new restify.UnauthorizedError('WRONG PASSWORD'));
         
         req.depotSession.username = req.params.username;
-        res.send(200);
+        if(user.type == "admin") {
+            res.send(200, {message: "Admin"});
+        } else {
+            res.send(200, {message: "User"});
+        }
     });
 });
 
@@ -106,6 +110,7 @@ server.get('/products/:id', function(req, res, next) {
 
 server.get('/products', function(req, res, next) {
     Product.find({}, function(err, products) {
+        console.log(products);
         res.send(200, products);
     });
 });
