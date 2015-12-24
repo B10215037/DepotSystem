@@ -224,7 +224,7 @@ server.get('/orders', checkLoginned, function(req, res, next) {
                         if (order.ordered_by == user.username) {
                             response.MY_ORDERS.push(order);
                         }
-                        if (! order.taken_by && order.state != 'archived') {
+                        if (! order.taken_by && order.state == 'submitted') {
                             response.NOT_TAKEN.push(order);
                         }
                         if (order.taken_by == user.username) {
