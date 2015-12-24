@@ -91,7 +91,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
         QJsonObject object = QJsonDocument::fromJson(response.toUtf8()).object();
         switch (whichFormCallIndex) {
         case Form::Login:
-            if (object["message"].toString().split(" ")[0] == "Admin") {
+            if (object["message"].toString().split(" ")[0] == "admin") {
                 emit changeWindow(Form::Login, Form::ManagerMenu);
                 userName = "Admin:" + userName;
             }
@@ -150,6 +150,10 @@ void UserView::getProductsInfoSlot() {
 
     if (userName.at(0) == 'A') whichFormCallIndex = Form::ManagerMenu;
     else whichFormCallIndex = -1;
+
+    QList<Product> products;
+    Product product("ID");
+    products.append(product);
 
     connector->getProductsInfo();
 }
