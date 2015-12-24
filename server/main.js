@@ -89,19 +89,12 @@ server.post('/login', function(req, res, next) {
         if (user.password != req.params.password) return next(new restify.UnauthorizedError('WRONG PASSWORD'));
 
         req.depotSession.username = req.params.username;
-<<<<<<< Updated upstream
-        if(user.type == "admin") {
-            res.send(200, {message: "Admin"});
-        } else {
-            res.send(200, {message: "User"});
-=======
         if (user.type == 'admin') {
             res.send(200, { type: 'Admin' });
         } else if (user.type == 'custormer'){
             res.send(200, { type: 'User' });
         } else {
             return next(new restify.UnautorizedError('WHICH TYPE ARE YOU OF'));
->>>>>>> Stashed changes
         }
     });
 });
