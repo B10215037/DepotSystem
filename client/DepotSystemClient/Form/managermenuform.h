@@ -1,7 +1,6 @@
 #ifndef MANAGERMENUFORM_H
 #define MANAGERMENUFORM_H
 
-#include <QWidget>
 #include "form.h"
 
 namespace Ui {

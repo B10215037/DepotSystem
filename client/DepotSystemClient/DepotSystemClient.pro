@@ -14,16 +14,17 @@ TEMPLATE = app
 include(IncludeClass.pri)
 
 SOURCES += main.cpp\
-		userview.cpp \
+        userview.cpp \
 	Form/form.cpp \
 	Form/customermenuform.cpp \
 	Form/managermenuform.cpp \
 	Form/productmanagementform.cpp \
 	Form/ordermanagementform.cpp \
         Form/LogInForm.cpp \
-    Form/checkorderform.cpp \
-    Form/singleorderform.cpp \
-    Form/confirmorderform.cpp
+        Form/checkorderform.cpp \
+        Form/singleorderform.cpp \
+        Form/confirmorderform.cpp \
+    Form/NewProductDialog.cpp
 
 HEADERS += userview.h \
 	Form/form.h \
@@ -32,9 +33,10 @@ HEADERS += userview.h \
 	Form/productmanagementform.h \
 	Form/ordermanagementform.h \
         Form/LogInForm.h \
-    Form/checkorderform.h \
-    Form/singleorderform.h \
-    Form/confirmorderform.h
+        Form/checkorderform.h \
+        Form/singleorderform.h \
+        Form/confirmorderform.h \
+    Form/NewProductDialog.h
 
 FORMS   += userview.ui \
 	Form/customermenuform.ui \
@@ -42,6 +44,7 @@ FORMS   += userview.ui \
 	Form/productmanagementform.ui \
 	Form/ordermanagementform.ui \
         Form/LogInForm.ui \
-    Form/checkorderform.ui \
-    Form/singleorderform.ui \
-    Form/confirmorderform.ui
+        Form/checkorderform.ui \
+        Form/singleorderform.ui \
+        Form/confirmorderform.ui \
+    Form/NewProductDialog.ui

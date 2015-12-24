@@ -20,5 +20,5 @@ void LogInForm::on_pushButton_clicked()
 }
 
 void LogInForm::showLogInResult(QString message) {
-    ui->label_3->setText(message);
+    emit showMessage(message, 10000);
 }

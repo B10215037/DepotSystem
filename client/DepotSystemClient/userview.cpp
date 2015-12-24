@@ -9,27 +9,34 @@ UserView::UserView(QWidget *parent) :
 
     //LogInForm
     setForm(Form::Login, new LogInForm(this));
-    connect((LogInForm*) forms[0], SIGNAL(logInSignal(QString,QString)),
+    connect((LogInForm*) forms[Form::Login], SIGNAL(logInSignal(QString,QString)),
             this, SLOT(logInSlot(QString,QString)));
     connect(this, SIGNAL(logInResult(QString)),
-            (LogInForm*) forms[0], SLOT(showLogInResult(QString)));
+            (LogInForm*) forms[Form::Login], SLOT(showLogInResult(QString)));
 
     //CustomerMenu
     setForm(Form::CustomerMenu, new CustomerMenuForm(this));
-    connect((CustomerMenuForm*) forms[1], SIGNAL(logOutSignal()),
+    connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(logOutSignal()),
             this, SLOT(logOutSlot()));
 
     //ManagerMenu
     setForm(Form::ManagerMenu, new ManagerMenuForm(this));
-    connect((ManagerMenuForm*) forms[2], SIGNAL(getProductsInfoSignal()),
+    connect((ManagerMenuForm*) forms[Form::ManagerMenu], SIGNAL(getProductsInfoSignal()),
             this, SLOT(getProductsInfoSlot()));
-    connect((ManagerMenuForm*) forms[2], SIGNAL(logOutSignal()),
+    connect((ManagerMenuForm*) forms[Form::ManagerMenu], SIGNAL(logOutSignal()),
                 this, SLOT(logOutSlot()));
 
     //ProductManagement
     setForm(Form::ProductManagement, new ProductManagementForm(this));
-    connect(this, SIGNAL(productManagementResult(QList<Product>)),
-            (ProductManagementForm*) forms[3], SLOT(showProductManagementResult(QList<Product>)));
+    connect(this,
+            SIGNAL(productManagementResult(QList<Product>)),
+            (ProductManagementForm*) forms[Form::ProductManagement],
+            SLOT(showProductManagementResult(QList<Product>)));
+    connect((ProductManagementForm*) forms[Form::ProductManagement],
+            SIGNAL(updateProductsSignal(QList<Product>,QList<Product>,QList<Product>)),
+            this,
+            SLOT(updateProductsSlot(QList<Product>,QList<Product>,QList<Product>)));
+
 
     //OrderManagement
     setForm(Form::OrderManagement, new OrderManagementForm(this));
@@ -78,16 +85,22 @@ void UserView::replyFinished(QNetworkReply* reply) {
             break;
         case Form::CustomerMenu:
             break;
+        case Form::ManagerMenu:
+            break;
+        case Form::ProductManagement:
+            emit showMessage(response, 10000);
+            break;
         default:
             break;
         }
     }
     else if (reply->isReadable()) {
-        QList<QNetworkCookie> cookies =
-                qvariant_cast< QList<QNetworkCookie> >(reply->header(QNetworkRequest::SetCookieHeader));
+        QList<QNetworkCookie> cookies = qvariant_cast<QList<QNetworkCookie> >(
+                    reply->header(QNetworkRequest::SetCookieHeader));
         qDebug() << "\n[UserView::replyFinished] @ COOKIES]" << cookies;
 
-        if(cookies.count() != 0) connector->cookieJar()->setCookiesFromUrl(cookies, reply->request().url());
+        if(cookies.count() != 0) connector->cookieJar()->setCookiesFromUrl(cookies,
+                                                                           reply->request().url());
 
         response = reply->readAll();
         printf("\n[UserView::replyFinished @ DATA] %s\n", response.toUtf8().data());
@@ -96,7 +109,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
         QJsonObject object = QJsonDocument::fromJson(response.toUtf8()).object();
         switch (whichFormCallIndex) {
         case Form::Login:
-            if (object["message"].toString().split(" ")[0] == "Admin") {
+            if (object["type"].toString().split(" ")[0] == "Admin") {
                 emit changeWindow(Form::Login, Form::ManagerMenu);
                 userName = "Admin:" + userName;
             }
@@ -106,7 +119,9 @@ void UserView::replyFinished(QNetworkReply* reply) {
             }
             emit logInResult("");
             break;
-        case Form::CustomerMenu: {
+        case Form::CustomerMenu:
+            break;
+        case Form::ManagerMenu: {
             QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
             QList<Product> products;
             for (int i = 0; i < array.size(); i++) {
@@ -119,6 +134,9 @@ void UserView::replyFinished(QNetworkReply* reply) {
             emit productManagementResult(products);
             break;
         }
+        case Form::ProductManagement:
+            emit showMessage("成功更新" + response, 10000);
+            break;
         default:
             break;
         }
@@ -135,7 +153,7 @@ void UserView::showLoadingDialog() {
     widgetsRecycleList.append(dialog);
 }
 
-void UserView::logInSlot(QString username, QString password) {
+void UserView::logInSlot(QString username, QString password) { //Form::Login
     showLoadingDialog();
 
     whichFormCallIndex = Form::Login;
@@ -150,17 +168,23 @@ void UserView::logOutSlot() {
     connector->logOut();
 }
 
-void UserView::getProductsInfoSlot() {
+void UserView::getProductsInfoSlot() { //Form::ManagerMenu
     showLoadingDialog();
 
     if (userName.at(0) == 'A') whichFormCallIndex = Form::ManagerMenu;
     else whichFormCallIndex = -1;
 
-    QList<Product> products;
-    Product product("ID");
-    products.append(product);
-
     connector->getProductsInfo();
+}
+
+void UserView::updateProductsSlot(QList<Product> newProducts,
+                                  QList<Product> changedProducts,
+                                  QList<Product> deletedProducts) {
+    whichFormCallIndex = Form::ProductManagement;
+
+    if (newProducts.size() > 0) connector->postNewProducts(newProducts);
+    if (changedProducts.size() > 0) connector->putEditedProducts(changedProducts);
+    if (deletedProducts.size() > 0) connector->deleteProducts(deletedProducts);
 }
 
 void UserView::resizeEvent(QResizeEvent* event)

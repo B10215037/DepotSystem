@@ -40,7 +40,7 @@ private:
     Ui::UserView *ui;
     Form *forms[Form::FORM_COUNT];
     QList<QWidget*> widgetsRecycleList;
-    bool whichFormCallIndex;
+    int whichFormCallIndex;
     QString userName;
 
     void showLoadingDialog();
@@ -57,6 +57,9 @@ private slots:
     void logInSlot(QString username, QString password);
     void logOutSlot();
     void getProductsInfoSlot();
+    void updateProductsSlot(QList<Product> newProducts,
+                            QList<Product> changedProducts,
+                            QList<Product> deletedProducts);
 };
 
 #endif // USERVIEW_H

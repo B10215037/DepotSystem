@@ -8,15 +8,9 @@
 class ManagerAccount : public Account
 {
 public:
-    ManagerAccount(QString id);
+    ManagerAccount();
 
-//    QList<Order> getOrdersWereTaken();
-//    QList<Order> getOrdersWillBeTaken();
-//    void acceptOrder(int index);
-//    void rejectOrder(int index);
-
-//private:
-//    Order ordersWereTaken, ordersWillBeTaken;
+    QList<Product> newProducts, deletedProducts, changedProducts;
 };
 
 #endif // MANAGERACCOUNT_H
