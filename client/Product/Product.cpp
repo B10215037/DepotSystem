@@ -55,8 +55,8 @@ bool Product::hasID() {
 
 QString Product::toJson() {
     if (hasID())
-        return QString("{\"id\":\"%1\",\"productname\":\"%2\",\"stock\":%3,\"price\":%4}")
+        return QString("{\"id\":\"%1\",\"name\":\"%2\",\"stock\":%3,\"price\":%4}")
                 .arg(ID).arg(name).arg(stock).arg(price);
-    return QString("{\"productname\":\"%2\",\"stock\":%3,\"price\":%4}")
+    return QString("{\"name\":\"%2\",\"stock\":%3,\"price\":%4}")
             .arg(name).arg(stock).arg(price);
 }

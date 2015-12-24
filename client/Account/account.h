@@ -9,7 +9,8 @@ protected:
     QString id;
 
 public:
-    Account(QString id);
+    Account();
+    void setId(QString ID);
     QString getId();
 };
 
