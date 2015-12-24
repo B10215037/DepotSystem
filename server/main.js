@@ -1,27 +1,23 @@
-//db.getCollectionNames()
-//db.accounts.find()
-//db.products.remove({"name":"toastA"})
-//db.orders.drop()
-var restify  = require('restify');
-var server   = restify.createServer();
+'use strict';
+var restify = require('restify');
+var server = restify.createServer();
 server.use(restify.bodyParser());
 
 var sessions = require("client-sessions");
 server.use(sessions({
-    cookieName: 'depotSession', // cookie name dictates the key name added to the request object
-    secret: 'DolanGooby', // should be a large unguessable string
-    duration: 3 * 24 * 60 * 60 * 1000 // how long the session will stay valid in ms
+    cookieName: 'depotSession',
+    secret: 'DolanGooby',
+    duration: 3 * 24 * 60 * 60 * 1000
 }));
-var async = require('async');
+
 var mongoose = require('mongoose');
-var Schema   = mongoose.Schema;
-mongoose.connect('mongodb://localhost/test1');
-//mongoose.connect('mongodb://localhost/depot');
+var Schema = mongoose.Schema;
+mongoose.connect('mongodb://admin:admin@ds056688.mongolab.com:56688/depot');
 
 var AccountSchema = new Schema({
     username: String,
     password: String,
-    orders  : [Schema.Types.ObjectId],
+    orders: [Schema.Types.ObjectId],
     orders_taken: [Schema.Types.ObjectId],
     type: String
 });
@@ -32,10 +28,8 @@ var OrderSchema = new Schema({
         product: Schema.Types.ObjectId,
         amount: Number
     }],
-    submitted: Boolean,
     ordered_by: String,
-//    ordered_by: [Schema.Types.ObjectId],
-    taken_by: [Schema.Types.ObjectId]
+    taken_by: String
 });
 
 var ProductSchema = new Schema({
@@ -44,355 +38,281 @@ var ProductSchema = new Schema({
     price: Number
 });
 
-//AccountSchema.static('findByUsername', function (name, callback) {
-//    return this.find({ username: name }, callback);
-//});
-
 var Account = mongoose.model('Accounts', AccountSchema);
-var Order   = mongoose.model('Order', OrderSchema);
+var Order = mongoose.model('Order', OrderSchema);
 var Product = mongoose.model('Product', ProductSchema);
 
-server.pre(function (request, response, next) {
-    request.headers.accept = 'application/json';
+server.pre(function (req, res, next) {
+    req.headers.accept = 'application/json';
     return next();
 });
 
-server.post('/register', function (request, response, next) {
-
-    console.log("username = " + request.params.username);
-    console.log("password = " + request.params.password);
-
-    if (request.params.username && request.params.password) {
-        Account.findOne({username: request.params.username}, function (err, user) {
-            if (err)
-            {
-                console.log("error:" + err);
-                response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
-            } else {
-                console.log(" user = " + user);
-                if (user) {
-                    response.send(500, {message: "fuck you gooby, this username is already used!!"});
-                }
-                else
-                {
-                    var newUser = new Account({
-                        username: request.params.username,
-                        password: request.params.password,
-                        type:"customer"
-                    });
-                    newUser.save(function(error){
-                        if (error) {
-                            response.send(500, {message: "sorry gooby, database server is down!!"});
-                        } else {
-                            response.send(200, {message: "Successful, very good gooby, that's my good dog."});
-                        }
-                    });
-                }
-            }
-        });
-
-    } else {
-        response.send(400, {message: "fuck you gooby, input the right format!!!"});
-    }
-
+function checkLoginned(req, res, next) {
+    if (! req.depotSession.username) return next(new restify.UnauthorizedError("NOT YET LOGINNED"));
     return next();
-});
+}
 
-server.post('/login', function(request, response, next) {
-
-    console.log("username = " + request.params.username);
-    console.log("password = " + request.params.password);
-
-    if(request.params.username && request.params.password){
-        Account.findOne({username: request.params.username}, function (err, user) {
-            if (err)
-            {
-                console.log("error:" + err);
-                response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
-            }else{
-                console.log(" user = " + user);
-                if(user){
-                    if(user.username === request.params.username && user.password === request.params.password){
-                        request.depotSession.username = user.username;
-                        console.log(request.depotSession.username);
-                        if( user.type == "admin" ){
-                            response.send(200, {message: "Admin login successfully, gooby!!"});
-                        }else{
-                            response.send(200, {message: "User login successfully, gooby!!"});
-                        }
-                    }else{
-                        response.send(500, {message: "Wrong password, stupid gooby!!"});
-                    }
-                }else{
-                    response.send(500, {message: "fuck you gooby, this username doesn't exist!!"});
-                }
-            }
-        });
-
-    }else{
-        response.send(400, {message: "fuck you gooby, input the right format!!!"});
-    }
-
-    return next();
-});
-
-server.get('/logout', function(request, response, next){
-    if(request.depotSession.username){
-        request.depotSession.reset();
-        request.depotSession = null;
-    }
-    response.send(200, {message: "Log out successfully, good gooby"});
-    return next();
-});
-
-server.post('/products', function(request, response, next){
-    if (!request.depotSession.username) {
-        response.send(400, {message: "fuck you gooby!!!, you didn't login or you are not an admin!!"});
-    } else {
-        Account.findOne({username: request.depotSession.username}, function (err, user) {
-            if(err){
-                response.send(400, {message: "Sorry gooby!!!, Account Error!!!"});
-            }
-            if(user.type == "admin"){
-                request.params.forEach(function(item) {
-                    if(item.productname){
-                        Product.findOne({name: item.productname}, function (err, existed) {
-                            if(err)
-                            {
-                                console.log("error:" + err);
-                                response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
-                            }
-                            else
-                            {
-                                console.log(" product = " + existed);
-                                if(existed){
-                                    response.send(400, {message: "fuck you gooby!!!, this product has already been added!!"});
-                                }else{
-                                    var product = new Product({
-                                        name: item.productname,
-                                        stock: item.stock,
-                                        price: item.price
-                                    });
-                                    product.save(function(error){
-                                        if(error){
-                                            response.send(500, {message: "Sorry gooby, database server is down!!"});
-                                        }else{
-                                            response.send(200, {message: "Successful, very good gooby, You add a product."});
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    }else{
-                        response.send(400, {message: "fuck you gooby, send the right format!!!"});
-                    }
-                });
-            }else if(user.type == "customer"){
-                response.send(500, {message: "fuck you gooby, you are not an admin!!!"});
-            }else{
-                response.send(500, {message: "fuck you gooby, sth wrong in user accounts type!!!"});
-            }
-        });
-    }
-    return next();
-});
-
-server.get('/products', function(request, response, next)
-{
-    Product.find({}, function (err, products) {
-        response.send(200, products);
+function checkAdmin(req, res, next) {
+    Account.findOne({ username: req.depotSession.username }, function (err, user) {
+        if (err) return next(new restify.InternalServerError("DATABASE ERROR"));
+        if (! user) return next(new restify.UnauthorizedError("USER NOT EXIST"));
+        if (user.type != 'admin') return next(new restify.ForbiddenError("CUSTOMER NOT ALLOWED"));
+        return next();
     });
-    return next();
+}
+
+server.post('/register', function(req, res, next) {
+    if (! req.params.username || ! req.params.password) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+    Account.findOne({ username: req.params.username }, function(err, user) {
+        if (err) return next(new restify.InternalServerError("DATABASE ERROR"));
+        if (user) return next(new restify.ForbiddenError('USERNAME EXISTED'));
+
+        var user = new Account({
+            username: req.params.username,
+            password: req.params.password,
+            type: 'customer'
+        });
+        user.save(function(err) {
+            if (err) return next(new restify.InternalServerError("DATABASE ERROR"));
+            res.send(200);
+        });
+    });
 });
 
-server.put('/products', function(request, response, next)
-{
-    if (!request.depotSession.username) {
-        response.send(400, {message: "fuck you gooby!!!, you didn't login or you are not an admin!!"});
-    } else {
-        Account.findOne({username: request.depotSession.username}, function (err, user) {
-            if(user.type == "admin"){
-                request.params.forEach(function(item)
-                {
-                    if(item.id){
-                        Product.findOne({_id: item.id}, function (err, product) {
-                            if(err){
-                                console.log("error:" + err);
-                                response.send(500, {message: "sorry gooby, I don't know what's going on. contact me pls"});
-                            }else{
-                                console.log("product = " + product);
-                                Product.findOne({name: item.productname}, function (err, productWithNewName) {
-                                    if(productWithNewName){
-                                        response.send(500, {message: "fuck you gooby, use different product name!!"});
-                                        return next();
-                                    }
-                                    if(product){
-                                        if(item.productname){
-                                            product.name = item.productname;
-                                        }
-                                        if(item.stock){
-                                            product.stock = item.stock;
-                                        }
-                                        if(item.price){
-                                            product.price = item.price;
-                                        }
-                                        product.save(function(error) {
-                                            if(error){
-                                                response.send(500, {message: "Sorry gooby, database server is down!!"});
-                                            }else{
-                                                response.send(200, {message: "Successful, very good gooby, You update a product."});
-                                            }
-                                        });
-                                    }else{
-                                        response.send(500, {message: "fuck you gooby, this product doesn't exist !!"});
-                                    }
-                                });
-                            }
-                        });
-                    }else{
-                        response.send(400, {message: "fuck you gooby, send the right format!!!"});
-                    }
-                });
-            }else if(user.type == "customer"){
-                response.send(400, {message: "fuck you gooby, you are not a admin!!!"});
-            }else{
-                response.send(500, {message: "fuck you gooby, sth wrong in user accounts type!!!"});
-            }
-        });
-    }
-    return next();
+server.post('/login', function(req, res, next) {
+    if (! req.params.username || ! req.params.password) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+    Account.findOne({ username: req.params.username }, function(err, user) {
+        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+        if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
+        if (user.password != req.params.password) return next(new restify.UnauthorizedError('WRONG PASSWORD'));
+        
+        req.depotSession.username = req.params.username;
+        res.send(200);
+    });
 });
 
-server.del('/products', function(request, response, next)
-{
-    if (!request.depotSession.username) {
-        response.send(400, {message: "fuck you gooby!!!, you didn't login or you are not an admin!!"});
-    } else {
-        Account.findOne({username: request.depotSession.username}, function (err, user) {
-            if(user.type == "admin"){
-                request.params.forEach(function(item)
-                {
-                    if(item.id)
-                    {
-                        Product.findOne({_id: item.id}).remove().exec();
-                    }
-                });
-                response.send(200, {message: "delete successfully, gooby!!!"});
-            } else if (user.type == "customer") {
-                response.send(400, {message: "fuck you gooby, you are not a admin!!!"});
-            } else {
-                response.send(500, {message: "fuck you gooby, sth wrong in user accounts type!!!"});
-            }
-        });
-    }
-    return next();
+server.get('/logout', checkLoginned, function(req, res, next) {
+    req.depotSession.reset();
+    res.send(200);
 });
 
-server.get('/userOrders', function(request, response, next)
-{
-    if (!request.depotSession.username) {
-        response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
-    } else {
-        Account.findOne({ username: request.depotSession.username }, function (err, user) {
-//            var orders = [];
-//            for (order of user.orders) {
-//                Order.findOne({ _id: mongoose.Types.ObjectId(order._id) }, function(err, order) {
-//                    orders.push(order);
-//                });
-//            }
-            response.send(200, user.orders);
-        });
-    }
+server.get('/products/:id', function(req, res, next) {
+    Product.findOne({ _id: req.params.id }, function(err, product) {
+        res.send(200, product);
+    });
 });
 
-server.post('/userOrders', function(request, response, next) {
-    if ( !request.depotSession.username) {
-        response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
-    } else {
-        if ( !request.params.state ) {
-            response.send(500, {message: "fuck you gooby, wrong format!!!"});
-            return next();
-        }
-        var totalPrice = 0;
-        var order = new Order({
-            state: request.params.state,
-            price: 0,
-            items: [],
-            ordered_by: request.depotSession.username
-        });
-        async.each(request.params.items,
-            function(item, callback){
-                if(item.id) {
-                    Product.findOne({_id: item.id}, function (err, product) {
-                        if (!product){
-                            response.send(500, {message: "fuck you gooby, product not found!!!"});
-                        } else {
-                            console.log(item);
-                            product.stock -= item.amount;
-                            totalPrice += item.amount * product.price;
-                            order.items.push({
-                                product: item.id,
-                                amount:  item.amount
-                            });
-                        }
-                    });
-                } else {
-                    response.send(500, {message: "fuck you gooby, wrong format!!!"});
-                    return next();
-                }
-                callback();
-        },
-            function(error){
-                if(error){
-                    console.log(error);
-                } else {
-                    setTimeout(function(){
-                        console.log("Done!");
-                        console.log("totalPrice:" + totalPrice);
-                        order.price = totalPrice;
-                        order.save(function(error){
-                            if(error){
-                                response.send(500, {message: "Sorry gooby, database server is down!!"});
-                            }else{
-                                response.send(200, {message: "Successful, very good gooby, You add a order."});
-                            }
-                        });
-                        Account.findOne({ username: request.depotSession.username }, function (err, user){
-                            user.orders.push(order._id);
-                            console.log(order);
-                            user.save(function(error){
-                                if(error){
-                                    response.send(500, {message: "Sorry gooby, database server is down!!"});
-                                }else{
-                                    response.send(200, {message: "Successful, very good gooby, You add an order."});
-                                }
-                            });
-                        });
-                    }, 1500);
-                }
-        });
-    }
-    return next();
+server.get('/products', function(req, res, next) {
+    Product.find({}, function(err, products) {
+        res.send(200, products);
+    });
 });
 
-server.get('/orders', function(request, response, next)
-{
-    if (!request.depotSession.username) {
-        response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
-    } else {
-        Account.findOne({ username: request.depotSession.username }, function (err, user){
-            if( user.type != "admin"){
-                response.send(400, { message: "fuck you gooby!!!, you didn't login or you are not an admin!!" });
-            }
-        });
-        setTimeout(function() {
-            Order.find({}, function (err, orders) {
-                response.send(200, orders);
+server.post('/products', checkLoginned, checkAdmin, function(req, res, next) {
+    for (let item of req.params) if (! item.name) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+    let saved = 0;
+    for (let item of req.params) {
+        Product.findOne({ name: item.name }, function(err, product) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+            if (product) return next(new restify.ForbiddenError('PRODUCT DEFINED'));
+            
+            product = new Product({
+                name: item.name,
+                stock: item.stock,
+                price: item.price
             });
-        }, 1000);
+            product.save(function(err) {
+                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                if (++saved == req.params.length) res.send(200);
+            });
+        });
     }
 });
 
-server.listen(80, function() {
-    console.log(server.name + ' listening at ' +  server.url);
+server.put('/products', checkLoginned, checkAdmin, function(req, res, next) {
+    let saved = 0;
+    for (let item of req.params) {
+        if (! item.id) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+        Product.findOne({ _id: item.id }, function(err, product) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+            if (! product) return next(new restify.BadRequest('PRODUCT NOT EXISTED'));
+
+            Product.findOne({ name: item.name }, function(err, product) {
+                if (product) return next(new restify.ForbiddenError('PRODUCT NAME EXISTED'));
+            
+                if (item.name) product.name = item.name;
+                if (item.stock) product.stock = item.stock;
+                if (item.price) product.price = item.price;
+                product.save(function(err) {
+                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                    saved++
+                    if (++saved == req.params.length) res.send(200);
+                });
+            });
+        });
+    }
 });
+
+server.del('/products', checkLoginned, checkAdmin, function(req, res, next) {
+    req.params.forEach(function(product) {
+        if (product.id) {
+            Product.findOne({ _id: product.id }).remove().exec();
+            res.send(200);
+        }
+    });
+});
+
+server.get('/orders/:id', checkLoginned, function(req, res, next) {
+    Account.findOne({ username: req.depotSession.username }, function(err, user) {
+        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+        if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
+        if (order.ordered_by != req.depotSession.username && order.taken_By != req.depotSession.username && user.type != 'admin')
+            return next(new restify.ForbiddenError('NOT YOUR ORDER'));
+
+        Order.findOne({ _id: req.params.id }, function(err, order) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+            res.send(200, order);
+        });
+    });
+});
+
+server.get('/orders', checkLoginned, function(req, res, next) { 
+    Account.findOne({ username: req.depotSession.username }, function(err, user) {
+        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+        if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
+
+        var response = {};
+        Account.findOne({ username: req.depotSession.username }, function(err, user) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+            response.MY_ORDERS = [];
+            if (user.type == 'customer') {
+                let got = 0;
+                for (let orderId of user.orders) {
+                    Order.findOne({ _id: orderId }, function(err, order) {
+                        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+                        response.MY_ORDERS.push(order);
+                        if (++got == user.orders.length) res.send(200, response);
+                    })
+                }
+            } else if (user.type == 'admin') {
+                response.I_TAKE = [];
+                response.NOT_TAKEN = [];
+                Order.find({}, function(err, orders) {
+                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                    for (let order of orders) {
+                        if (order.ordered_by == user.username) response.MY_ORDERS.push(order);
+                        if (! order.taken_by) response.NOT_TAKEN.push(order);
+                        if (order.taken_by == user.username) response.I_TAKE.push(order);
+                    }
+                    res.send(200, response);
+                });
+            }
+        });
+    });
+});
+
+server.post('/orders', checkLoginned, function(req, res, next) {
+    for (let item of req.params) if (! item.productId) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+    var total = 0;
+    var items = [];
+
+    req.params.forEach(function (item) {
+        Product.findOne({ _id: item.productId }, function(err, product) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+            if (! product) return next(new restify.BadRequestError('PRODUCT NOT EXISTED'));
+            if (product.stock < item.amount) return next(new restify.Forbidden('STOCK NOT AVAILABLE'));
+            
+            product.stock -= item.amount;
+            product.save(function(err) {
+                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                total += item.amount * product.price;
+                items.push({
+                    product: item.productId,
+                    amount: item.amount
+                });
+
+                if (items.length == req.params.length) {
+                    var order = new Order({
+                        state: 'archived',
+                        items: items,
+                        ordered_by: req.depotSession.username
+                    });
+                    order.save(function(err) {
+                        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                        Account.findOne({ username: req.depotSession.username }, function(err, user) {
+                            user.orders.push(order._id);
+                            user.save(function(err) {
+                                if (err) return next(new restify.InternalServerError("DATABASE ERROR"));
+                                res.send(200, { total: total });
+                            });
+                        });
+                    })
+                }
+            });
+        });
+    });
+});
+
+server.put('/orders', checkLoginned, function(req, res, next) {
+    for (let order of req.params) if (! order.id) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+    Account.findOne({ username: req.depotSession.username }, function(err, user) {
+        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+        if (! user) return next(new restify.BadRequestError('USER NOT EXISTED'));
+
+        let saved = 0;
+        for (let order of req.params) {
+            Order.findOne({ _id: order.id }, function(err, o) {
+                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                if (! o) return next(new restify.BadRequestError('ORDER NOT EXISTED'));
+                
+                if (o.ordered_by == req.depotSession.username) {
+                    if (o.state != 'archived' && order.items) return next(new restify.ForbiddenError('UPDATE ITEMS NOT ALLOWED'));
+                    
+                    o.items = order.items;
+                }
+                if (order.taken_by == req.depotSession.username) {
+                    if (user.type != 'admin') return next(new restify.ForbiddenError('ONLY ADMIN CAN TAKE ORDER'));
+                    if (order.items && o.ordered_by != req.depotSession.username && o.state != 'archived')
+                        return next(new restify.ForbiddenError('UPDATE ITEMS NOT ALLOWED'));
+
+                    o.taken_by = order.taken_by;
+                    o.state = order.state;
+                }
+
+                o.save(function(err) {
+                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                    if (++saved == req.params.length) res.send(200);
+                })
+            });
+        }
+    })
+});
+
+server.del('/orders', function(err, user) {
+    for (let order of req.params) if (! order.id) return next(new restify.BadRequestError('WRONG FORMAT'));
+
+    let removed = 0
+    for (let order of req.params) {
+        Order.findOne({ _id: order.id }, function(err, order) {
+            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+            if (order.state != 'archived') return next(new restify.ForbiddenError('HAVE SUBMITTED'));
+            if (order.ordered_by != req.depotSession.username) return next(new restify.ForbiddenError('NOT YOUR ORDER'));
+
+            order.remove(function(err) {
+                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                if (++removed == req.params.length) res.send(200);
+            });
+        });
+    }
+});
+
+server.listen(80);

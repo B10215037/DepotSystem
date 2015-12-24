@@ -55,6 +55,11 @@ void UserView::changeWindow(int from, int to)
     forms[to]->show();
 }
 
+void UserView::showMessage(const QString &text, int timeout = 0)
+{
+    ui->statusBar->showMessage(text, timeout);
+}
+
 void UserView::replyFinished(QNetworkReply* reply) {
     reply->deleteLater();
     while (widgetsRecycleList.size() != 0) delete widgetsRecycleList.takeAt(0);
@@ -91,7 +96,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
         QJsonObject object = QJsonDocument::fromJson(response.toUtf8()).object();
         switch (whichFormCallIndex) {
         case Form::Login:
-            if (object["message"].toString().split(" ")[0] == "admin") {
+            if (object["message"].toString().split(" ")[0] == "Admin") {
                 emit changeWindow(Form::Login, Form::ManagerMenu);
                 userName = "Admin:" + userName;
             }
@@ -171,4 +176,6 @@ void UserView::setForm(int formIndex, Form *form)
     forms[formIndex]->hide();
     connect(forms[formIndex], SIGNAL(changeWindow(int,int)),
             this, SLOT(changeWindow(int,int)));
+    connect(forms[formIndex], SIGNAL(showMessage(QString,int)),
+            this, SLOT(showMessage(QString,int)));
 }

@@ -22,6 +22,7 @@ public:
 
 signals:
     void changeWindow(int from, int to);
+    void showMessage(const QString &text, int timeout);
 
 public slots:
 };
