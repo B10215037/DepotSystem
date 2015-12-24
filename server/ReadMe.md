@@ -1,15 +1,15 @@
 目前的使用者(帳號：密碼)
 =====
 1. admin: admin
-2. dolan: xyz
+2. dolan: gooby
 
 所有的運送狀態 ENUM
 =====
-* Archived
-* Submitted
-* Processing
-* Shipping
-* Arrived
+* archived
+* submitted
+* processing
+* shipping
+* arrived
 
 POST /register
 =====
@@ -55,7 +55,7 @@ GET /logout --cookie
 1. GET --cookie
 
     * 說明：回傳用戶的所有訂單。如果是管理員，還會回傳負責的訂單及尚未處理的訂單。
-    * 回傳格式：if admin => { "MY_ORDERS": ["ID"], "NOT_TAKEN": ["ID"], "I_TAKE": ["ID"] } or { "MY_ORDERS": ["ID"] }
+    * 回傳格式：if admin => { "MY_ORDERS": [{}], "NOT_TAKEN": [{}], "I_TAKE": [{}] } or { "MY_ORDERS": [{}] }
 
 2. GET /orders/:id --cookie
 
@@ -70,9 +70,9 @@ GET /logout --cookie
 3. PUT --cookie
 
     * 格式：[{ "id": "ID", "state": "ENUM", "taken_by": "STRING", "items": [{ "productId": "ID", "amount": "NUMBER" }] }]
-    * 說明：id 是必要的，除此之外都是選填。如果要更新 items，請將整個情形帶入，而非僅寫入有改變的。
+    * 說明：id 是必要的。若有 items，其中每項也必備 productId。如果要刪除一項 item，請加入 "cancelled": "true"。
 
 4. DELETE --cookie
 
     * 格式：[{ "id": "ID" }]
-    * 說明：只有當訂單還未送出時才能刪除，並且必須是由下訂單的人才能執行。
+    * 說明：只有當訂單還是 archived 時（意即還在購物車）才能刪除，並且必須是由下訂單的人才能執行。

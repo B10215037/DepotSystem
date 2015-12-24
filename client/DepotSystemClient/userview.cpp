@@ -37,18 +37,18 @@ UserView::UserView(QWidget *parent) :
             this,
             SLOT(updateProductsSlot(QList<Product>,QList<Product>,QList<Product>)));
 
-
     //OrderManagement
-    setForm(Form::OrderManagement, new OrderManagementForm(this));
+    setForm(Form::OrderManagement, new OrderManagementForm(ui->widget));
     forms[Form::Login]->show();
 
     connector = new Connector();
     connect(connector, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(replyFinished(QNetworkReply*)));
 
-    setForm(Form::CheckOrder, new CheckOrderForm(this));
-    setForm(Form::ConfirmOrder, new ConfirmOrderForm(this));
-    setForm(Form::SingleOrder, new SingleOrderForm(this));
+    setForm(Form::CheckOrder, new CheckOrderForm(ui->widget));
+    setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget));
+    setForm(Form::SingleOrder, new SingleOrderForm(ui->widget));
+    ui->widget->resize(378, 232);
 }
 
 UserView::~UserView()
@@ -190,7 +190,7 @@ void UserView::updateProductsSlot(QList<Product> newProducts,
 void UserView::resizeEvent(QResizeEvent* event)
 {
     for (int i = 0; i < Form::FORM_COUNT; i++) {
-        forms[i]->resize(event->size());
+        forms[i]->resize(ui->widget->size());
     }
 }
 
