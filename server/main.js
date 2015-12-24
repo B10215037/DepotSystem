@@ -91,7 +91,7 @@ server.post('/login', function(req, res, next) {
         req.depotSession.username = req.params.username;
         if (user.type == 'admin') {
             res.send(200, { type: 'Admin' });
-        } else if (user.type == 'custormer'){
+        } else if (user.type == 'customer'){
             res.send(200, { type: 'User' });
         } else {
             return next(new restify.UnautorizedError('WHICH TYPE ARE YOU OF'));
