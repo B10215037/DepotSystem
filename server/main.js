@@ -184,7 +184,7 @@ server.get('/orders/:id', checkLoginned, function(req, res, next) {
     Account.findOne({ username: req.depotSession.username }, function(err, user) {
         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
         if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
-        if (order.ordered_by != req.depotSession.username && order.taken_By != req.depotSession.username && user.type != 'admin')
+        if (order.ordered_by != req.depotSession.username || user.type != 'admin')
             return next(new restify.ForbiddenError('NOT YOUR ORDER'));
 
         Order.findOne({ _id: req.params.id }, function(err, order) {
