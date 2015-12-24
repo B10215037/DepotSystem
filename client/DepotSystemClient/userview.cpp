@@ -8,40 +8,41 @@ UserView::UserView(QWidget *parent) :
     ui->setupUi(this);
 
     //LogInForm
-    setForm(Form::Login, new LogInForm(this));
+    setForm(Form::Login, new LogInForm(ui->widget));
     connect((LogInForm*) forms[0], SIGNAL(logInSignal(QString,QString)),
             this, SLOT(logInSlot(QString,QString)));
     connect(this, SIGNAL(logInResult(QString)),
             (LogInForm*) forms[0], SLOT(showLogInResult(QString)));
 
     //CustomerMenu
-    setForm(Form::CustomerMenu, new CustomerMenuForm(this));
+    setForm(Form::CustomerMenu, new CustomerMenuForm(ui->widget));
     connect((CustomerMenuForm*) forms[1], SIGNAL(logOutSignal()),
             this, SLOT(logOutSlot()));
 
     //ManagerMenu
-    setForm(Form::ManagerMenu, new ManagerMenuForm(this));
+    setForm(Form::ManagerMenu, new ManagerMenuForm(ui->widget));
     connect((ManagerMenuForm*) forms[2], SIGNAL(getProductsInfoSignal()),
             this, SLOT(getProductsInfoSlot()));
     connect((ManagerMenuForm*) forms[2], SIGNAL(logOutSignal()),
                 this, SLOT(logOutSlot()));
 
     //ProductManagement
-    setForm(Form::ProductManagement, new ProductManagementForm(this));
+    setForm(Form::ProductManagement, new ProductManagementForm(ui->widget));
     connect(this, SIGNAL(productManagementResult(QList<Product>)),
             (ProductManagementForm*) forms[3], SLOT(showProductManagementResult(QList<Product>)));
 
     //OrderManagement
-    setForm(Form::OrderManagement, new OrderManagementForm(this));
+    setForm(Form::OrderManagement, new OrderManagementForm(ui->widget));
     forms[Form::Login]->show();
 
     connector = new Connector();
     connect(connector, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(replyFinished(QNetworkReply*)));
 
-    setForm(Form::CheckOrder, new CheckOrderForm(this));
-    setForm(Form::ConfirmOrder, new ConfirmOrderForm(this));
-    setForm(Form::SingleOrder, new SingleOrderForm(this));
+    setForm(Form::CheckOrder, new CheckOrderForm(ui->widget));
+    setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget));
+    setForm(Form::SingleOrder, new SingleOrderForm(ui->widget));
+    ui->widget->resize(378, 232);
 }
 
 UserView::~UserView()
@@ -166,7 +167,7 @@ void UserView::getProductsInfoSlot() {
 void UserView::resizeEvent(QResizeEvent* event)
 {
     for (int i = 0; i < Form::FORM_COUNT; i++) {
-        forms[i]->resize(event->size());
+        forms[i]->resize(ui->widget->size());
     }
 }
 
