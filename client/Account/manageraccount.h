@@ -10,7 +10,7 @@ class ManagerAccount : public Account
 public:
     ManagerAccount();
 
-    QList<Product> newProducts, deletedProducts, changedProducts;
+    QList<Product> newProducts, deletedProducts, editedProducts;
 };
 
 #endif // MANAGERACCOUNT_H

@@ -2,10 +2,9 @@
 #define PRODUCTMANAGEMENTFORM_H
 
 #include "form.h"
-#include <QStandardItemModel>
-#include <QMessageBox>
 #include "NewProductDialog.h"
 #include "../Account/ManagerAccount.h"
+#include <QMessageBox>
 
 namespace Ui {
 class ProductManagementForm;
@@ -28,12 +27,15 @@ private slots:
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
     void on_pushButton_3_clicked();
+    void on_pushButton_4_clicked();
     void on_pushButton_5_clicked();
 
-    void showProductManagementResult(QList<Product> products);
     void addNewProduct(QString name, int stock, int price);
+    void editProduct(QModelIndex index, QString oldName);
+    void tableItemChanged(QModelIndex index);
     void recycle();
     void recycleAndConfirmUpdate();
+    void showProductManagementResult(QList<Product> products);
 
 private:
     Ui::ProductManagementForm *ui;

@@ -117,6 +117,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
                 userName = "User:" + userName;
                 emit changeWindow(Form::Login, Form::CustomerMenu);
             }
+            ui->label->setText(userName);
             emit logInResult("");
             break;
         case Form::CustomerMenu:

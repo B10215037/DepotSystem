@@ -38,6 +38,8 @@ void Connector::postNewProducts(Product *products, int size) {
         else jsonData += products[i].toJson() + ",";
     jsonData += "]";
     post(setRequest("/products", jsonData.size()), jsonData);
+
+    qDebug() << "[Connector::postNewProducts @ DATA]" << jsonData << "\n";
 }
 
 void Connector::postNewProducts(QList<Product> products) {
@@ -47,6 +49,8 @@ void Connector::postNewProducts(QList<Product> products) {
         else jsonData += products[i].toJson() + ",";
     jsonData += "]";
     post(setRequest("/products", jsonData.size()), jsonData);
+
+    qDebug() << "[Connector::postNewProducts @ DATA]" << jsonData << "\n";
 }
 
 void Connector::getProductsInfo() {
@@ -60,6 +64,8 @@ void Connector::putEditedProducts(Product *products, int size) { //待測
         else jsonData += products[i].toJson() + ",";
     jsonData += "]";
     put(setRequest("/products", jsonData.size()), jsonData);
+
+    qDebug() << "[Connector::putEditedProducts @ DATA]" << jsonData << "\n";
 }
 
 void Connector::putEditedProducts(QList<Product> products) { //待測
@@ -69,16 +75,20 @@ void Connector::putEditedProducts(QList<Product> products) { //待測
         else jsonData += products[i].toJson() + ",";
     jsonData += "]";
     put(setRequest("/products", jsonData.size()), jsonData);
+
+    qDebug() << "[Connector::putEditedProducts @ DATA]" << jsonData << "\n";
 }
 
 void Connector::deleteProducts(QList<Product> products) { //待測
-    QByteArray jsonData = "[";
+    QByteArray jsonData = "{\"data\":[";
     for (int i = 0; i < products.size(); i++)
         if (i == products.size() - 1)
             jsonData += QString("{\"id\":\"%1\"}").arg(products[i].getID());
         else jsonData += QString("{\"id\":\"%1\"}").arg(products[i].getID()) + ",";
-    jsonData += "]";
-    deleteResource(setRequest("/products", jsonData.size()));
+    jsonData += "],\"_DELETE\":\"true\"}";
+    post(setRequest("/products", jsonData.size()), jsonData);
+
+    qDebug() << "[Connector::deleteProducts @ DATA]" << jsonData << "\n";
 }
 
 ///Order
