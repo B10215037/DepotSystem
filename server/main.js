@@ -167,7 +167,7 @@ server.put('/products', checkLoginned, checkAdmin, function(req, res, next) {
 
             if (item.name) {
                 Product.findOne({ name: item.name }, function(err, existed) {
-                    if (existed) return next(new restify.ForbiddenError('PRODUCT NAME EXISTED'));
+                    if (existed && existed._id != item.id) return next(new restify.ForbiddenError('PRODUCT NAME EXISTED'));
 
                     product.name = item.name;
                     if (item.stock) product.stock = item.stock;
