@@ -3,15 +3,13 @@
 #define HEADER_DEBUG
 
 Connector::Connector() : QNetworkAccessManager() {
-//    setCookieJar(new QNetworkCookieJar);
-    serverUrl = "http://140.118.175.208";
-
-//    connect(this, SIGNAL(finished(QNetworkReply*)),
-//            this, SLOT(replyFinished(QNetworkReply*)));
+#define url_a "http://depot-system.herokuapp.com";
+#define url_b "http://140.118.175.208";
+    serverUrl = url_a;
 }
 
 ///register
-void Connector::registerAccount(QString userName, QString password) {
+void Connector::registerAccount(QString userName, QString password) { //待測
     QString jsonData = QString("{\"username\":\"%1\",\"password\":\"%2\"}").arg(userName, password);
     post(setRequest("/register", jsonData.size()), jsonData.toUtf8());
 }
@@ -24,11 +22,12 @@ void Connector::logIn(QString username, QString password) {
 
 ///logout
 void Connector::logOut() {
+    get(setRequest("/logout", 0));
+
     clearAccessCache();
     QList<QNetworkCookie> cookies = cookieJar()->cookiesForUrl(QUrl(serverUrl + "/login"));
     for (int i = 0; i < cookies.size(); i++)
         cookieJar()->deleteCookie(cookies[i]);
-    get(QNetworkRequest(QUrl(serverUrl + "/logout")));
 }
 
 ///product
@@ -38,7 +37,15 @@ void Connector::postNewProducts(Product *products, int size) {
         if (i == size - 1) jsonData += products[i].toJson();
         else jsonData += products[i].toJson() + ",";
     jsonData += "]";
-    qDebug() << "@@@" << jsonData;
+    post(setRequest("/products", jsonData.size()), jsonData);
+}
+
+void Connector::postNewProducts(QList<Product> products) {
+    QByteArray jsonData = "[";
+    for (int i = 0; i < products.size(); i++)
+        if (i == products.size() - 1) jsonData += products[i].toJson();
+        else jsonData += products[i].toJson() + ",";
+    jsonData += "]";
     post(setRequest("/products", jsonData.size()), jsonData);
 }
 
@@ -46,18 +53,36 @@ void Connector::getProductsInfo() {
     get(QNetworkRequest(QUrl(serverUrl + "/products")));
 }
 
-void Connector::putEditedProducts(Product *products, int size) {
+void Connector::putEditedProducts(Product *products, int size) { //待測
     QByteArray jsonData = "[";
     for (int i = 0; i < size; i++)
         if (i == size - 1) jsonData += products[i].toJson();
         else jsonData += products[i].toJson() + ",";
     jsonData += "]";
-    qDebug() << "###" << jsonData;
     put(setRequest("/products", jsonData.size()), jsonData);
 }
 
+void Connector::putEditedProducts(QList<Product> products) { //待測
+    QByteArray jsonData = "[";
+    for (int i = 0; i < products.size(); i++)
+        if (i == products.size() - 1) jsonData += products[i].toJson();
+        else jsonData += products[i].toJson() + ",";
+    jsonData += "]";
+    put(setRequest("/products", jsonData.size()), jsonData);
+}
+
+void Connector::deleteProducts(QList<Product> products) { //待測
+    QByteArray jsonData = "[";
+    for (int i = 0; i < products.size(); i++)
+        if (i == products.size() - 1)
+            jsonData += QString("{\"id\":\"%1\"}").arg(products[i].getID());
+        else jsonData += QString("{\"id\":\"%1\"}").arg(products[i].getID()) + ",";
+    jsonData += "]";
+    deleteResource(setRequest("/products", jsonData.size()));
+}
+
 ///Order
-void Connector::postNewOrders(State s, QVector<Item> items){
+void Connector::postNewOrders(State s, QVector<Item> items){ //待測
     int size = items.size();
     //Adding state
     QByteArray jsonData = "";
@@ -73,7 +98,7 @@ void Connector::postNewOrders(State s, QVector<Item> items){
     post(setRequest("/userOrders", jsonData.size()), jsonData);
 }
 
-void Connector::getOrdersInfo() {
+void Connector::getOrdersInfo() { //待測
     get(QNetworkRequest(QUrl(serverUrl + "/userOrders")));
 }
 
@@ -97,29 +122,3 @@ QNetworkRequest Connector::setRequest(QString path, int dataSize) {
 
     return request;
 }
-
-//void Connector::replyFinished(QNetworkReply* reply) {
-//    reply->deleteLater();
-
-//    QString response;
-
-//    if (reply->error() != QNetworkReply::NoError) {
-//        response = reply->errorString() + reply->readAll();
-//        qDebug() << "\n[UserView::replyFinished] @ ERROR]" << response;
-//        emit sendReceivedMessage(response);
-//        return;
-//    }
-
-//    if (reply->isReadable()) {
-//        QList<QNetworkCookie> cookies =
-//                qvariant_cast< QList<QNetworkCookie> >(reply->header(QNetworkRequest::SetCookieHeader));
-//        qDebug() << "\n[UserView::replyFinished] @ COOKIES]" << cookies;
-
-//        if(cookies.count() != 0) cookieJar()->setCookiesFromUrl(cookies, reply->request().url());
-
-//        response = reply->readAll();
-//        printf("\n[UserView::replyFinished @ DATA] %s\n", response.toUtf8().data());
-//        fflush(stdout);
-//        emit sendReceivedMessage(response);
-//    }
-//}

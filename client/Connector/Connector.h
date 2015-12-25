@@ -23,8 +23,11 @@ public:
 
     ///products
     void postNewProducts(Product *products, int size);
+    void postNewProducts(QList<Product> products);
     void getProductsInfo();
     void putEditedProducts(Product *products, int size);
+    void putEditedProducts(QList<Product> products);
+    void deleteProducts(QList<Product> products);
 
     ///orders
     void postNewOrders(State, QVector<Item>);
