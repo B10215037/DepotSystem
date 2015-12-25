@@ -44,10 +44,10 @@ GET /logout --cookie
     * 格式：[{ "id": "ID_STRING", "name": "STRING", "stock": "NUMBER", "price": "NUMBER" }]
     * 說明：管理員更新數筆產品。id 可從 GET /products 中獲取。
 
-4. DELETE --cookie（管理員限定）
+4. DELETE /products/:id --cookie（管理員限定）
 
-    * 格式：[{ "id": "ID_STRING" }]
     * 說明：管理員刪除數筆產品
+    * 若要批次刪除，請用 POST /products 並標記 "_DELETE": "true"，格式為 { "data": ["ID"], "_DELETE": "true" }。
 
 /orders
 =====
@@ -72,7 +72,7 @@ GET /logout --cookie
     * 格式：[{ "id": "ID", "state": "ENUM", "taken_by": "STRING", "items": [{ "productId": "ID", "amount": "NUMBER" }] }]
     * 說明：id 是必要的。若有 items，其中每項也必備 productId。如果要刪除一項 item，請加入 "cancelled": "true"。
 
-4. DELETE --cookie
+4. DELETE /orders/:id --cookie
 
-    * 格式：[{ "id": "ID" }]
     * 說明：只有當訂單還是 archived 時（意即還在購物車）才能刪除，並且必須是由下訂單的人才能執行。
+    * 若要批次刪除，請用 POST /orders 並標記 "_DELETE": "true"，格式為 { "data": ["ID"], "_DELETE": "true" }。
