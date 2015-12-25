@@ -450,7 +450,7 @@ server.del('/orders', function(err, user) {
             order.remove(function(err) {
                 if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
                 if (++removed == req.params.length) res.send(200);
-            });
+            }).exec();;
         });
     }
 });
