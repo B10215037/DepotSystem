@@ -158,7 +158,7 @@ server.post('/products', checkLoginned, checkAdmin, function(req, res, next) {
 
 server.put('/products', checkLoginned, checkAdmin, function(req, res, next) {
     let saved = 0;
-    for (let item of req.params) {
+    req.params.forEach(function(item) {
         if (! item.id) return next(new restify.BadRequestError('WRONG FORMAT'));
 
         Product.findOne({ _id: item.id }, function(err, product) {
@@ -186,7 +186,7 @@ server.put('/products', checkLoginned, checkAdmin, function(req, res, next) {
                 });
             }
         });
-    }
+    });
 });
 
 server.del('/products/:id', checkLoginned, checkAdmin, function(req, res, next) {
