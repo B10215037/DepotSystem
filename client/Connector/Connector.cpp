@@ -83,8 +83,8 @@ void Connector::deleteProducts(QList<Product> products) { //待測
     QByteArray jsonData = "{\"data\":[";
     for (int i = 0; i < products.size(); i++)
         if (i == products.size() - 1)
-            jsonData += QString("{\"id\":\"%1\"}").arg(products[i].getID());
-        else jsonData += QString("{\"id\":\"%1\"}").arg(products[i].getID()) + ",";
+            jsonData += QString("\"%1\"").arg(products[i].getID());
+        else jsonData += QString("\"%1\"").arg(products[i].getID()) + ",";
     jsonData += "],\"_DELETE\":\"true\"}";
     post(setRequest("/products", jsonData.size()), jsonData);
 

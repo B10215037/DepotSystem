@@ -8,26 +8,26 @@ UserView::UserView(QWidget *parent) :
     ui->setupUi(this);
 
     //LogInForm
-    setForm(Form::Login, new LogInForm(this));
+    setForm(Form::Login, new LogInForm(ui->widget));
     connect((LogInForm*) forms[Form::Login], SIGNAL(logInSignal(QString,QString)),
             this, SLOT(logInSlot(QString,QString)));
     connect(this, SIGNAL(logInResult(QString)),
             (LogInForm*) forms[Form::Login], SLOT(showLogInResult(QString)));
 
     //CustomerMenu
-    setForm(Form::CustomerMenu, new CustomerMenuForm(this));
+    setForm(Form::CustomerMenu, new CustomerMenuForm(ui->widget));
     connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(logOutSignal()),
             this, SLOT(logOutSlot()));
 
     //ManagerMenu
-    setForm(Form::ManagerMenu, new ManagerMenuForm(this));
+    setForm(Form::ManagerMenu, new ManagerMenuForm(ui->widget));
     connect((ManagerMenuForm*) forms[Form::ManagerMenu], SIGNAL(getProductsInfoSignal()),
             this, SLOT(getProductsInfoSlot()));
     connect((ManagerMenuForm*) forms[Form::ManagerMenu], SIGNAL(logOutSignal()),
                 this, SLOT(logOutSlot()));
 
     //ProductManagement
-    setForm(Form::ProductManagement, new ProductManagementForm(this));
+    setForm(Form::ProductManagement, new ProductManagementForm(ui->widget));
     connect(this,
             SIGNAL(productManagementResult(QList<Product>)),
             (ProductManagementForm*) forms[Form::ProductManagement],
