@@ -30,6 +30,7 @@ public:
     void deleteProducts(QList<Product> products);
 
     ///orders
+    void postNewOrders(QList<Item>);
     void postNewOrders(State, QVector<Item>);
     void getOrdersInfo();
 

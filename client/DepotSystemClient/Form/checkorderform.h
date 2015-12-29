@@ -16,6 +16,9 @@ public:
     explicit CheckOrderForm(QWidget *parent = 0);
     ~CheckOrderForm();
 
+signals:
+
+
 private slots:
     void on_pushButton_clicked();
 

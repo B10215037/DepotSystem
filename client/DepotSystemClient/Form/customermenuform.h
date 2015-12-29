@@ -18,6 +18,8 @@ public:
 
 signals:
     void logOutSignal();
+    void getProductsInfoSignal();
+    void getOrdersInfoSignal();
 
 private slots:
     void on_pushButton_3_clicked();
