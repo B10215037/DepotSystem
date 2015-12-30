@@ -2,6 +2,7 @@
 #define CUSTOMERMENUFORM_H
 
 #include <QWidget>
+#include <QSize>
 #include "form.h"
 
 namespace Ui {

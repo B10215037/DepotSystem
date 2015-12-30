@@ -20,7 +20,7 @@ public:
     ~SingleOrderForm();
 
 signals:
-    void postOrdersInfoSignal(QList<Item>);
+    void transferOrderSignal(QList<Item>, QList<QString>);
 
 private slots:
     void on_pushButton_clicked();

@@ -32,6 +32,8 @@ public:
 
     Connector *connector;
 
+
+
 protected:
     void resizeEvent(QResizeEvent* event);
     void setForm(int formIndex, Form *form);
@@ -50,6 +52,7 @@ signals:
     void productManagementResult(QList<Product> products);
     void orderManagementResult(QList<Order> orders_taken, QList<Order> orders_notTaken);
     void productSingleOrderResult(QList<Product> products);
+    void postValidSignal(bool);
 
 private slots:
     void changeWindow(int from, int to);
@@ -64,6 +67,7 @@ private slots:
     void updateProductsSlot(QList<Product> newProducts,
                             QList<Product> changedProducts,
                             QList<Product> deletedProducts);
+
 };
 
 #endif // USERVIEW_H

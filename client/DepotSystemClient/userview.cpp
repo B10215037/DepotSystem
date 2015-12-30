@@ -55,6 +55,11 @@ UserView::UserView(QWidget *parent) :
 
     //ConfirmOrder
     setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget));
+    
+    connect((ConfirmOrderForm*) forms[Form::ConfirmOrder], SIGNAL(postOrdersInfoSignal(QList<Item>)),
+            this, SLOT(postOrdersInfoSlot(QList<Item>)));
+    connect(this, SIGNAL(postValidSignal(bool)),
+            (ConfirmOrderForm*) forms[Form::ConfirmOrder], SLOT(postValid(bool)));
 
     //SingleOrder
     setForm(Form::SingleOrder, new SingleOrderForm(ui->widget));
@@ -62,8 +67,9 @@ UserView::UserView(QWidget *parent) :
             SIGNAL(productSingleOrderResult(QList<Product>)),
             (SingleOrderForm*) forms[Form::SingleOrder],
             SLOT(showProductSingleOrderResult(QList<Product>)));
-    connect((SingleOrderForm*) forms[Form::SingleOrder], SIGNAL(postOrdersInfoSignal(QList<Item>)),
-            this, SLOT(postOrdersInfoSlot(QList<Item>)));
+
+    connect((SingleOrderForm*) forms[Form::SingleOrder], SIGNAL(transferOrderSignal(QList<Item>, QList<QString>)),
+            (ConfirmOrderForm*) forms[Form::ConfirmOrder], SLOT(transferOrderSlot(QList<Item>, QList<QString>)));
 
     connector = new Connector();
     connect(connector, SIGNAL(finished(QNetworkReply*)),
@@ -114,7 +120,9 @@ void UserView::replyFinished(QNetworkReply* reply) {
         case Form::ProductManagement:
             emit showMessage(response, 10000);
             break;
-
+        case Form::ConfirmOrder:
+            emit postValidSignal(false);
+            break;
         default:
             break;
         }
@@ -146,6 +154,9 @@ void UserView::replyFinished(QNetworkReply* reply) {
             emit logInResult("");
             break;
         case Form::CustomerMenu:
+            break;
+        case Form::ConfirmOrder:
+            emit postValidSignal(true);
             break;
         case Form::ManagerMenu: {
             if (subFunc == 0) {
@@ -253,6 +264,9 @@ void UserView::getOrdersInfoSlot() {
 }
 
 void UserView::postOrdersInfoSlot(QList<Item> items){
+    if(userName.at(0) != 'A'){
+        whichFormCallIndex = Form::ConfirmOrder;
+    }
     connector->postNewOrders(items);
 }
 

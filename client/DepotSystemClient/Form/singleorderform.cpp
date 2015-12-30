@@ -16,20 +16,25 @@ SingleOrderForm::~SingleOrderForm()
 void SingleOrderForm::on_pushButton_clicked()
 {
     QList<Item>  itemList;
+    QList<QString> nameList;
     for(int i = 0;i<idList.size();i++){
         QModelIndex index = ((QStandardItemModel*) ui->tableView->model())->index(i,2,QModelIndex());
         int curAmount = ((QStandardItemModel*) ui->tableView->model())->data(index).toInt();
         if(curAmount > 0){
         	itemList.push_back(Item(idList[i], curAmount));
+        	index = ((QStandardItemModel*) ui->tableView->model())->index(i,0,QModelIndex());
+        	QString curName = ((QStandardItemModel*) ui->tableView->model())->data(index).toString();
+        	nameList.push_back(curName);
         }
+
     }
-    /*
-    qDebug() << "!!!!!!!!!";
-    for(int i = 0;i<itemList.size();i++){
-    	qDebug() << itemList[i].product << ", " << itemList[i].amount;
-    }*/
-    emit postOrdersInfoSignal(itemList);
-    changeWindow(SingleOrder, ConfirmOrder);
+    if(itemList.size() > 0){
+
+        emit transferOrderSignal(itemList, nameList);
+        changeWindow(SingleOrder, ConfirmOrder);
+    }else{
+
+    }
 }
 
 void SingleOrderForm::on_pushButton_2_clicked()
