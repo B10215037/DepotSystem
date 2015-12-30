@@ -40,7 +40,7 @@ private:
     Ui::UserView *ui;
     Form *forms[Form::FORM_COUNT];
     QList<QWidget*> widgetsRecycleList;
-    int whichFormCallIndex;
+    int whichFormCallIndex, subFunc;
     QString userName;
 
     void showLoadingDialog();
@@ -48,6 +48,7 @@ private:
 signals:
     void logInResult(QString message);
     void productManagementResult(QList<Product> products);
+    void orderManagementResult(QList<Order> orders_taken, QList<Order> orders_notTaken);
     void productSingleOrderResult(QList<Product> products);
 
 private slots:

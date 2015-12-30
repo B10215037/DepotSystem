@@ -95,15 +95,13 @@ void Connector::deleteProducts(QList<Product> products) {
 void Connector::postNewOrders(QList<Item> items){
 	int size = items.size();
     //Adding state
-    QByteArray jsonData = "";
-    jsonData += QString("{\"items\":");
+    QByteArray jsonData = "[";
 
     //Adding items
-    jsonData += "[";
     for (int i = 0; i < size; i++)
         if (i == size - 1) jsonData += items[i].toJson();
         else jsonData += items[i].toJson() + ",";
-    jsonData += "]}";
+    jsonData += "]";
     qDebug() << "@@@" << jsonData;
     post(setRequest("/orders", jsonData.size()), jsonData);
 

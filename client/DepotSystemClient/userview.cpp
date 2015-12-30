@@ -16,19 +16,21 @@ UserView::UserView(QWidget *parent) :
 
     //CustomerMenu
     setForm(Form::CustomerMenu, new CustomerMenuForm(ui->widget));
-    connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(logOutSignal()),
-            this, SLOT(logOutSlot()));
-    connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(getOrdersInfoSignal()),
-            this, SLOT(getOrdersInfoSlot()));
     connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(getProductsInfoSignal()),
             this, SLOT(getProductsInfoSlot()));
+    connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(getOrdersInfoSignal()),
+            this, SLOT(getOrdersInfoSlot()));
+    connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(logOutSignal()),
+            this, SLOT(logOutSlot()));
 
     //ManagerMenu
     setForm(Form::ManagerMenu, new ManagerMenuForm(ui->widget));
     connect((ManagerMenuForm*) forms[Form::ManagerMenu], SIGNAL(getProductsInfoSignal()),
             this, SLOT(getProductsInfoSlot()));
+    connect((ManagerMenuForm*) forms[Form::ManagerMenu], SIGNAL(getOrdersInfoSignal()),
+            this, SLOT(getOrdersInfoSlot()));
     connect((ManagerMenuForm*) forms[Form::ManagerMenu], SIGNAL(logOutSignal()),
-                this, SLOT(logOutSlot()));
+            this, SLOT(logOutSlot()));
 
     //ProductManagement
     setForm(Form::ProductManagement, new ProductManagementForm(ui->widget));
@@ -43,16 +45,15 @@ UserView::UserView(QWidget *parent) :
 
     //OrderManagement
     setForm(Form::OrderManagement, new OrderManagementForm(ui->widget));
-    forms[Form::Login]->show();
-
-    connector = new Connector();
-    connect(connector, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(replyFinished(QNetworkReply*)));
+    connect(this,
+            SIGNAL(orderManagementResult(QList<Order>,QList<Order>)),
+            (OrderManagementForm*) forms[Form::OrderManagement],
+            SLOT(showOrderManagementResult(QList<Order>,QList<Order>)));
 
     //CheckOrder
     setForm(Form::CheckOrder, new CheckOrderForm(ui->widget));
 
-
+    //ConfirmOrder
     setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget));
 
     //SingleOrder
@@ -63,6 +64,12 @@ UserView::UserView(QWidget *parent) :
             SLOT(showProductSingleOrderResult(QList<Product>)));
     connect((SingleOrderForm*) forms[Form::SingleOrder], SIGNAL(postOrdersInfoSignal(QList<Item>)),
             this, SLOT(postOrdersInfoSlot(QList<Item>)));
+
+    connector = new Connector();
+    connect(connector, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(replyFinished(QNetworkReply*)));
+
+    forms[Form::Login]->show();
 
     ui->widget->resize(378, 232);
 }
@@ -84,7 +91,6 @@ void UserView::showMessage(const QString &text, int timeout = 0)
 }
 
 void UserView::replyFinished(QNetworkReply* reply) {
-    qDebug() << "DDD";
     reply->deleteLater();
     while (widgetsRecycleList.size() != 0) delete widgetsRecycleList.takeAt(0);
     setEnabled(true);
@@ -142,22 +148,37 @@ void UserView::replyFinished(QNetworkReply* reply) {
         case Form::CustomerMenu:
             break;
         case Form::ManagerMenu: {
-            QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
-            QList<Product> products;
-            for (int i = 0; i < array.size(); i++) {
-                Product product(array[i].toObject()["_id"].toString());
-                product.setName(array[i].toObject()["name"].toString());
-                product.setStock(array[i].toObject()["stock"].toInt());
-                product.setPrice(array[i].toObject()["price"].toInt());
-                products.append(product);
+            if (subFunc == 0) {
+                QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
+                QList<Product> products;
+                for (int i = 0; i < array.size(); i++) {
+                    Product product(array[i].toObject()["_id"].toString());
+                    product.setName(array[i].toObject()["name"].toString());
+                    product.setStock(array[i].toObject()["stock"].toInt());
+                    product.setPrice(array[i].toObject()["price"].toInt());
+                    products.append(product);
+                }
+                emit productManagementResult(products);
             }
-            emit productManagementResult(products);
+            else if (subFunc == 1) {
+//                QJsonArray array_taken = object["I_TAKE"].toArray(),
+//                        array_notTaken = object["NOT_TAKEN"].toArray();
+//                QList<Product> products;
+//                for (int i = 0; i < array.size(); i++) {
+//                    Product product(array[i].toObject()["_id"].toString());
+//                    product.setName(array[i].toObject()["name"].toString());
+//                    product.setStock(array[i].toObject()["stock"].toInt());
+//                    product.setPrice(array[i].toObject()["price"].toInt());
+//                    products.append(product);
+//                }
+                //emit orderManagementResult(orders, orders);
+            }
             break;
         }
         case Form::ProductManagement:
             emit showMessage("成功更新" + response, 10000);
             break;
-        case Form::SingleOrder:{
+        case Form::SingleOrder: {
             QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
             QList<Product> products;
             for (int i = 0; i < array.size(); i++) {
@@ -201,11 +222,17 @@ void UserView::logOutSlot() {
     connector->logOut();
 }
 
-void UserView::getProductsInfoSlot() { //Form::ManagerMenu
+void UserView::getProductsInfoSlot() {
     showLoadingDialog();
 
-    if (userName.at(0) == 'A') whichFormCallIndex = Form::ManagerMenu;
-    else whichFormCallIndex = Form::SingleOrder;
+    if (userName.at(0) == 'A') {
+        whichFormCallIndex = Form::ManagerMenu;
+        subFunc = 0;
+    }
+    else {
+        whichFormCallIndex = Form::SingleOrder;
+        subFunc = 0;
+    }
 
     connector->getProductsInfo();
 }
@@ -213,7 +240,14 @@ void UserView::getProductsInfoSlot() { //Form::ManagerMenu
 void UserView::getOrdersInfoSlot() {
     showLoadingDialog();
 
-    // whichFormCallIndex = Form::
+    if (userName.at(0) == 'A') {
+        whichFormCallIndex = Form::ManagerMenu;
+        subFunc = 1;
+    }
+    else {
+        whichFormCallIndex = Form::SingleOrder;
+        subFunc = 1;
+    }
 
     connector->getOrdersInfo();
 }

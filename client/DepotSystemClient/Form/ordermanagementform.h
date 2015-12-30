@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "form.h"
+#include "../Order/Order.h"
 
 namespace Ui {
 class OrderManagementForm;
@@ -18,6 +19,8 @@ public:
 
 private slots:
     void on_pushButton_3_clicked();
+
+    void showOrderManagementResult(QList<Order> orders_taken, QList<Order> orders_notTaken);
 
 private:
     Ui::OrderManagementForm *ui;

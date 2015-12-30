@@ -17,3 +17,8 @@ void OrderManagementForm::on_pushButton_3_clicked()
 {
     changeWindow(OrderManagement, ManagerMenu);
 }
+
+void OrderManagementForm::showOrderManagementResult(QList<Order> orders_taken,
+                                                    QList<Order> orders_notTaken) {
+
+}
