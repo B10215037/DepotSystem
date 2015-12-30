@@ -68,6 +68,7 @@ void UserView::showMessage(const QString &text, int timeout = 0)
 }
 
 void UserView::replyFinished(QNetworkReply* reply) {
+    qDebug() << "DDD";
     reply->deleteLater();
     while (widgetsRecycleList.size() != 0) delete widgetsRecycleList.takeAt(0);
     setEnabled(true);

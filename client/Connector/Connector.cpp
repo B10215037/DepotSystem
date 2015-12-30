@@ -57,7 +57,7 @@ void Connector::getProductsInfo() {
     get(QNetworkRequest(QUrl(serverUrl + "/products")));
 }
 
-void Connector::putEditedProducts(Product *products, int size) { //待測
+void Connector::putEditedProducts(Product *products, int size) {
     QByteArray jsonData = "[";
     for (int i = 0; i < size; i++)
         if (i == size - 1) jsonData += products[i].toJson();
@@ -68,7 +68,7 @@ void Connector::putEditedProducts(Product *products, int size) { //待測
     qDebug() << "[Connector::putEditedProducts @ DATA]" << jsonData << "\n";
 }
 
-void Connector::putEditedProducts(QList<Product> products) { //待測
+void Connector::putEditedProducts(QList<Product> products) {
     QByteArray jsonData = "[";
     for (int i = 0; i < products.size(); i++)
         if (i == products.size() - 1) jsonData += products[i].toJson();
@@ -79,7 +79,7 @@ void Connector::putEditedProducts(QList<Product> products) { //待測
     qDebug() << "[Connector::putEditedProducts @ DATA]" << jsonData << "\n";
 }
 
-void Connector::deleteProducts(QList<Product> products) { //待測
+void Connector::deleteProducts(QList<Product> products) {
     QByteArray jsonData = "{\"data\":[";
     for (int i = 0; i < products.size(); i++)
         if (i == products.size() - 1)
@@ -109,7 +109,7 @@ void Connector::postNewOrders(State s, QVector<Item> items){ //待測
 }
 
 void Connector::getOrdersInfo() { //待測
-    get(QNetworkRequest(QUrl(serverUrl + "/userOrders")));
+    get(setRequest("/orders", 0));
 }
 
 QNetworkRequest Connector::setRequest(QString path, int dataSize) {
