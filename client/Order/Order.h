@@ -22,7 +22,7 @@ struct Item
 
     QString toJson() {
 
-        return QString("{\"id\":\"%1\",\"amount\":%2}")
+        return QString("{\"productId\":\"%1\",\"amount\":\"%2\"}")
                 .arg(product).arg(amount);
         
     }

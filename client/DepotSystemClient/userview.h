@@ -48,6 +48,7 @@ private:
 signals:
     void logInResult(QString message);
     void productManagementResult(QList<Product> products);
+    void productSingleOrderResult(QList<Product> products);
 
 private slots:
     void changeWindow(int from, int to);
@@ -57,6 +58,8 @@ private slots:
     void logInSlot(QString username, QString password);
     void logOutSlot();
     void getProductsInfoSlot();
+    void getOrdersInfoSlot();
+    void postOrdersInfoSlot(QList<Item>);
     void updateProductsSlot(QList<Product> newProducts,
                             QList<Product> changedProducts,
                             QList<Product> deletedProducts);

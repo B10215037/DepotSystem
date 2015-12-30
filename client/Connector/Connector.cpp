@@ -92,6 +92,23 @@ void Connector::deleteProducts(QList<Product> products) {
 }
 
 ///Order
+void Connector::postNewOrders(QList<Item> items){
+	int size = items.size();
+    //Adding state
+    QByteArray jsonData = "";
+    jsonData += QString("{\"items\":");
+
+    //Adding items
+    jsonData += "[";
+    for (int i = 0; i < size; i++)
+        if (i == size - 1) jsonData += items[i].toJson();
+        else jsonData += items[i].toJson() + ",";
+    jsonData += "]}";
+    qDebug() << "@@@" << jsonData;
+    post(setRequest("/orders", jsonData.size()), jsonData);
+
+}
+
 void Connector::postNewOrders(State s, QVector<Item> items){ //待測
     int size = items.size();
     //Adding state
@@ -105,7 +122,7 @@ void Connector::postNewOrders(State s, QVector<Item> items){ //待測
         else jsonData += items[i].toJson() + ",";
     jsonData += "]}";
     qDebug() << "@@@" << jsonData;
-    post(setRequest("/userOrders", jsonData.size()), jsonData);
+    post(setRequest("/orders", jsonData.size()), jsonData);
 }
 
 void Connector::getOrdersInfo() { //待測

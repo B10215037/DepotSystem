@@ -21,10 +21,12 @@ void CustomerMenuForm::on_pushButton_3_clicked()
 
 void CustomerMenuForm::on_pushButton_clicked()
 {
+	emit getProductsInfoSignal();
     changeWindow(CustomerMenu, SingleOrder);
 }
 
 void CustomerMenuForm::on_pushButton_2_clicked()
 {
+    emit getOrdersInfoSignal();
     changeWindow(CustomerMenu, CheckOrder);
 }
