@@ -31,7 +31,7 @@ public:
 
     ///orders
     void postNewOrders(QList<Item>);
-    void postNewOrders(State, QVector<Item>);
+    void putOrder(Order);
     void getOrdersInfo();
 
 private:

@@ -46,12 +46,17 @@ UserView::UserView(QWidget *parent) :
     //OrderManagement
     setForm(Form::OrderManagement, new OrderManagementForm(ui->widget));
     connect(this,
-            SIGNAL(orderManagementResult(QList<Order>,QList<Order>)),
+            SIGNAL(orderManagementResult(QList<Order>, QList<Order>)),
             (OrderManagementForm*) forms[Form::OrderManagement],
-            SLOT(showOrderManagementResult(QList<Order>,QList<Order>)));
+            SLOT(showOrderManagementResult(QList<Order>, QList<Order>)));
 
     //CheckOrder
     setForm(Form::CheckOrder, new CheckOrderForm(ui->widget));
+    connect(this, SIGNAL(showOrdersSignal(QList<Order>)),
+            (CheckOrderForm*) forms[Form::CheckOrder], SLOT(showOrdersSlot(QList<Order>)));
+
+    connect((CheckOrderForm*) forms[Form::CheckOrder], SIGNAL(putSignal(Order)),
+            this, SLOT(putOrderSlot(Order)));
 
     //ConfirmOrder
     setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget));
@@ -70,6 +75,11 @@ UserView::UserView(QWidget *parent) :
 
     connect((SingleOrderForm*) forms[Form::SingleOrder], SIGNAL(transferOrderSignal(QList<Item>, QList<QString>)),
             (ConfirmOrderForm*) forms[Form::ConfirmOrder], SLOT(transferOrderSlot(QList<Item>, QList<QString>)));
+
+    //ModifyOrder
+//    setForm(Form::ModifyOrder, new ModifyOrderForm(ui->widget));
+//    connect((CheckOrderForm*) forms[Form::CheckOrder], SIGNAL(transferOrderModify(Order)),
+//            (ModifyOrderForm*) forms[Form::ModifyOrder], SLOT(transferOrderModifySlot(Order)));
 
     connector = new Connector();
     connect(connector, SIGNAL(finished(QNetworkReply*)),
@@ -158,6 +168,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
         case Form::ConfirmOrder:
             emit postValidSignal(true);
             break;
+
         case Form::ManagerMenu: {
             if (subFunc == 0) {
                 QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
@@ -190,17 +201,67 @@ void UserView::replyFinished(QNetworkReply* reply) {
             emit showMessage("成功更新" + response, 10000);
             break;
         case Form::SingleOrder: {
-            QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
-            QList<Product> products;
-            for (int i = 0; i < array.size(); i++) {
-                Product product(array[i].toObject()["_id"].toString());
-                product.setName(array[i].toObject()["name"].toString());
-                product.setStock(array[i].toObject()["stock"].toInt());
-                product.setPrice(array[i].toObject()["price"].toInt());
-                products.append(product);
-            }
-            emit productSingleOrderResult(products);
+            if(subFunc == 0){
+                QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
+                QList<Product> products;
+                for (int i = 0; i < array.size(); i++) {
+                    Product product(array[i].toObject()["_id"].toString());
+                    product.setName(array[i].toObject()["name"].toString());
+                    product.setStock(array[i].toObject()["stock"].toInt());
+                    product.setPrice(array[i].toObject()["price"].toInt());
+                    products.append(product);
+                }
+                emit productSingleOrderResult(products);
+            }else{
+                response = response.right(response.size() - response.indexOf(":") - 1);
+                response = response.left(response.size() - 1);
+                QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
+                QList<Order> orders;
+                for (int i = 0; i < array.size(); i++) {
+                    Order order(array[i].toObject()["_id"].toString());
+                    
+                    //String to State
+                    switch(array[i].toObject()["state"].toString().at(2).toLatin1()){
+                        case 'c':
+                            order.setState(0);
+                            break;
+                        case 'b':
+                            order.setState(1);
+                            break;
+                        case 'o':
+                            order.setState(2);
+                            break;
+                        case 'i':                            
+                            order.setState(3);
+                            break;
+                        case 'r':
+                            order.setState(4);
+                            break;
+                    }
+                    order.setWhoOrdered(array[i].toObject()["ordered_by"].toString());
+                    order.setSubmitted(array[i].toObject()["_v"].toBool());
+
+                    //Dealing with items
+
+                    for(int j = 0;j<array[i].toObject()["items"].toArray().size();j++){
+                        order.addItem(array[i].toObject()["items"].toArray()[j].toObject()["productId"].toString(), array[i].toObject()["items"].toArray()[j].toObject()["amount"].toInt());
+
+                    }
+                    orders.append(order);
+                    QList<Item> tmp = orders[i].getItems();
+//                    qDebug() << "@@@@@@@@@@@@@@@@";
+
+//                    for(int j = 0;j<tmp.size();j++){
+//                        qDebug() << tmp.at(j).product;
+//                        qDebug() << tmp.at(j).amount;
+
+//                    }
+                    
+                }
+               emit showOrdersSignal(orders);
+            }    
             break;
+            
         }
         default:
             break;
@@ -268,6 +329,11 @@ void UserView::postOrdersInfoSlot(QList<Item> items){
         whichFormCallIndex = Form::ConfirmOrder;
     }
     connector->postNewOrders(items);
+}
+
+void UserView::putOrderSlot(Order order){
+    connector->putOrder(order);
+
 }
 
 void UserView::updateProductsSlot(QList<Product> newProducts,

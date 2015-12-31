@@ -107,20 +107,20 @@ void Connector::postNewOrders(QList<Item> items){
 
 }
 
-void Connector::postNewOrders(State s, QVector<Item> items){ //待測
-    int size = items.size();
+void Connector::putOrder(Order order){
+	QList<Item> items = order.getItems();
+	int size = items.size();
     //Adding state
-    QByteArray jsonData = "";
-    jsonData += QString("{\"state\":%1,\"items\":").arg(s);
+    QByteArray jsonData = "[{";
+    jsonData += "\"id\":\"" + order.getNumber() + "\",\"items\":[";
 
     //Adding items
-    jsonData += "[";
     for (int i = 0; i < size; i++)
         if (i == size - 1) jsonData += items[i].toJson();
         else jsonData += items[i].toJson() + ",";
-    jsonData += "]}";
+    jsonData += "]}]";
     qDebug() << "@@@" << jsonData;
-    post(setRequest("/orders", jsonData.size()), jsonData);
+    put(setRequest("/orders", jsonData.size()), jsonData);
 }
 
 void Connector::getOrdersInfo() { //待測

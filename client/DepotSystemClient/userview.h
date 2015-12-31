@@ -53,6 +53,7 @@ signals:
     void orderManagementResult(QList<Order> orders_taken, QList<Order> orders_notTaken);
     void productSingleOrderResult(QList<Product> products);
     void postValidSignal(bool);
+    void showOrdersSignal(QList<Order>);
 
 private slots:
     void changeWindow(int from, int to);
@@ -64,6 +65,7 @@ private slots:
     void getProductsInfoSlot();
     void getOrdersInfoSlot();
     void postOrdersInfoSlot(QList<Item>);
+    void putOrderSlot(Order);
     void updateProductsSlot(QList<Product> newProducts,
                             QList<Product> changedProducts,
                             QList<Product> deletedProducts);

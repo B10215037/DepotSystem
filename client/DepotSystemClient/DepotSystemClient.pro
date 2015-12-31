@@ -24,7 +24,8 @@ SOURCES += main.cpp\
         Form/checkorderform.cpp \
         Form/singleorderform.cpp \
         Form/confirmorderform.cpp \
-    Form/NewProductDialog.cpp
+    Form/NewProductDialog.cpp \
+    Form/modifyorderform.cpp
 
 HEADERS += userview.h \
 	Form/form.h \
@@ -36,7 +37,8 @@ HEADERS += userview.h \
         Form/checkorderform.h \
         Form/singleorderform.h \
         Form/confirmorderform.h \
-    Form/NewProductDialog.h
+    Form/NewProductDialog.h \
+    Form/modifyorderform.h
 
 FORMS   += userview.ui \
 	Form/customermenuform.ui \
@@ -47,4 +49,5 @@ FORMS   += userview.ui \
         Form/checkorderform.ui \
         Form/singleorderform.ui \
         Form/confirmorderform.ui \
-    Form/NewProductDialog.ui
+    Form/NewProductDialog.ui \
+    Form/modifyorderform.ui
