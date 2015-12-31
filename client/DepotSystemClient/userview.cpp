@@ -54,8 +54,7 @@ UserView::UserView(QWidget *parent) :
     setForm(Form::CheckOrder, new CheckOrderForm(ui->widget));
 
     //ConfirmOrder
-    setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget));
-    
+    setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget)); 
     connect((ConfirmOrderForm*) forms[Form::ConfirmOrder], SIGNAL(postOrdersInfoSignal(QList<Item>)),
             this, SLOT(postOrdersInfoSlot(QList<Item>)));
     connect(this, SIGNAL(postValidSignal(bool)),
@@ -67,9 +66,10 @@ UserView::UserView(QWidget *parent) :
             SIGNAL(productSingleOrderResult(QList<Product>)),
             (SingleOrderForm*) forms[Form::SingleOrder],
             SLOT(showProductSingleOrderResult(QList<Product>)));
-
-    connect((SingleOrderForm*) forms[Form::SingleOrder], SIGNAL(transferOrderSignal(QList<Item>, QList<QString>)),
-            (ConfirmOrderForm*) forms[Form::ConfirmOrder], SLOT(transferOrderSlot(QList<Item>, QList<QString>)));
+    connect((SingleOrderForm*) forms[Form::SingleOrder],
+            SIGNAL(transferOrderSignal(QList<Item>,QList<QString>)),
+            (ConfirmOrderForm*) forms[Form::ConfirmOrder],
+            SLOT(transferOrderSlot(QList<Item>,QList<QString>)));
 
     connector = new Connector();
     connect(connector, SIGNAL(finished(QNetworkReply*)),
@@ -172,8 +172,8 @@ void UserView::replyFinished(QNetworkReply* reply) {
                 emit productManagementResult(products);
             }
             else if (subFunc == 1) {
-//                QJsonArray array_taken = object["I_TAKE"].toArray(),
-//                        array_notTaken = object["NOT_TAKEN"].toArray();
+                QJsonArray array_taken = object["I_TAKE"].toArray(),
+                        array_notTaken = object["NOT_TAKEN"].toArray();
 //                QList<Product> products;
 //                for (int i = 0; i < array.size(); i++) {
 //                    Product product(array[i].toObject()["_id"].toString());
