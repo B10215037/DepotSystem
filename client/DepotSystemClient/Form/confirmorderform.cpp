@@ -12,7 +12,7 @@ ConfirmOrderForm::ConfirmOrderForm(QWidget *parent) :
     confirmButton->setGeometry(QRect(70, 20, 60, 30));
     confirmButton->setText("確認");
     connect(confirmButton, SIGNAL(clicked()),
-            dialog, SLOT(done(int)));
+            dialog, SLOT(close()));
 }
 
 ConfirmOrderForm::~ConfirmOrderForm()

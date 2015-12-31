@@ -2,8 +2,8 @@
 #define Order_H
 
 #include <QString>
-#include <QVector>
 #include "../Product/Product.h"
+#include <QList>
 
 typedef QString ProductID;
 
@@ -21,7 +21,10 @@ struct Item
     }
 
     QString toJson() {
-
+    	if(amount == 0){
+    		return QString("{\"productId\":\"%1\",\"amount\":\"%2\",\"cancelled\":\"true\"}")
+                .arg(product).arg(amount);
+    	}
         return QString("{\"productId\":\"%1\",\"amount\":\"%2\"}")
                 .arg(product).arg(amount);
         
@@ -31,17 +34,20 @@ struct Item
 class Order
 {
 public:
+    const static QString stateText[5];
 	Order();
-	int getNumber();
+	Order(QString);
+	QString getNumber();
 	State getState();
-	void setState(State);
-	QVector<Item> getItems();
+	void setState(int);
+    QList<Item> getItems();
 	void addItem(QString, int);
 	int getItemAmount(QString);
 	void setItemAmount(QString, int);
 	void deleteItem(QString);
 	void submit();
 	bool isSubmitted();
+	void setSubmitted(bool);
 	QString getWhoOrdered();
 	void setWhoOrdered(QString);
 	QString getWhoTaken();
@@ -50,9 +56,9 @@ public:
 	QString toJson();
 
 private:
-	int number;
+    QString number;
 	State state;
-	QVector<Item> items;
+	QList<Item> items;
 	bool submitted;
 	QString orderedBy;
 	QString takenBy;
