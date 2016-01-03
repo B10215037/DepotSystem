@@ -76,12 +76,7 @@ void ProductManagementForm::on_pushButton_3_clicked() //新增貨物
     newProductDialog->show();
 }
 
-void ProductManagementForm::on_pushButton_4_clicked() //編輯按鈕
-{
-
-}
-
-void ProductManagementForm::on_pushButton_5_clicked() //刪除貨物
+void ProductManagementForm::on_pushButton_4_clicked() //刪除貨物
 {
     QModelIndexList index = ui->tableView->selectionModel()->selectedRows();
     for (int i = 0; i < index.size(); i++) {

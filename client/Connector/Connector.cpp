@@ -39,7 +39,7 @@ void Connector::postNewProducts(Product *products, int size) {
     jsonData += "]";
     post(setRequest("/products", jsonData.size()), jsonData);
 
-    qDebug() << "[Connector::postNewProducts @ DATA]" << jsonData << "\n";
+//    qDebug() << "\n[Connector::postNewProducts @ DATA]" << jsonData;
 }
 
 void Connector::postNewProducts(QList<Product> products) {
@@ -50,7 +50,7 @@ void Connector::postNewProducts(QList<Product> products) {
     jsonData += "]";
     post(setRequest("/products", jsonData.size()), jsonData);
 
-    qDebug() << "[Connector::postNewProducts @ DATA]" << jsonData << "\n";
+//    qDebug() << "\n[Connector::postNewProducts @ DATA]" << jsonData;
 }
 
 void Connector::getProductsInfo() {
@@ -65,7 +65,7 @@ void Connector::putEditedProducts(Product *products, int size) {
     jsonData += "]";
     put(setRequest("/products", jsonData.size()), jsonData);
 
-    qDebug() << "[Connector::putEditedProducts @ DATA]" << jsonData << "\n";
+//    qDebug() << "\n[Connector::putEditedProducts @ DATA]" << jsonData;
 }
 
 void Connector::putEditedProducts(QList<Product> products) {
@@ -76,7 +76,7 @@ void Connector::putEditedProducts(QList<Product> products) {
     jsonData += "]";
     put(setRequest("/products", jsonData.size()), jsonData);
 
-    qDebug() << "[Connector::putEditedProducts @ DATA]" << jsonData << "\n";
+//    qDebug() << "\n[Connector::putEditedProducts @ DATA]" << jsonData;
 }
 
 void Connector::deleteProducts(QList<Product> products) {
@@ -88,7 +88,7 @@ void Connector::deleteProducts(QList<Product> products) {
     jsonData += "],\"_DELETE\":\"true\"}";
     post(setRequest("/products", jsonData.size()), jsonData);
 
-    qDebug() << "[Connector::deleteProducts @ DATA]" << jsonData << "\n";
+//    qDebug() << "\n[Connector::deleteProducts @ DATA]" << jsonData;
 }
 
 ///Order
@@ -102,9 +102,7 @@ void Connector::postNewOrders(QList<Item> items){
         if (i == size - 1) jsonData += items[i].toJson();
         else jsonData += items[i].toJson() + ",";
     jsonData += "]";
-    qDebug() << "@@@" << jsonData;
     post(setRequest("/orders", jsonData.size()), jsonData);
-
 }
 
 void Connector::putOrder(Order order){
@@ -119,11 +117,10 @@ void Connector::putOrder(Order order){
         if (i == size - 1) jsonData += items[i].toJson();
         else jsonData += items[i].toJson() + ",";
     jsonData += "]}]";
-    qDebug() << "@@@" << jsonData;
     put(setRequest("/orders", jsonData.size()), jsonData);
 }
 
-void Connector::getOrdersInfo() { //待測
+void Connector::getOrdersInfo() {
     get(setRequest("/orders", 0));
 }
 

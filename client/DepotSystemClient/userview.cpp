@@ -88,6 +88,7 @@ UserView::UserView(QWidget *parent) :
     forms[Form::Login]->show();
 
     ui->widget->resize(378, 232);
+    ui->label->setText("");
 }
 
 UserView::~UserView()
@@ -113,7 +114,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
 
     QString response;
 
-    if (reply->error() != QNetworkReply::NoError) {
+    if (reply->error() != QNetworkReply::NoError) { //失敗的話
         response = reply->readAll();
         qDebug() << "\n[UserView::replyFinished] @ ERROR]" << reply->errorString() << response;
 
@@ -137,7 +138,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
             break;
         }
     }
-    else if (reply->isReadable()) {
+    else if (reply->isReadable()) { //成功的話
         QList<QNetworkCookie> cookies = qvariant_cast<QList<QNetworkCookie> >(
                     reply->header(QNetworkRequest::SetCookieHeader));
         qDebug() << "\n[UserView::replyFinished] @ COOKIES]" << cookies;
@@ -146,8 +147,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
                                                                            reply->request().url());
 
         response = reply->readAll();
-        printf("\n[UserView::replyFinished @ DATA] %s\n", response.toUtf8().data());
-        fflush(stdout);
+        qDebug() << "\n[UserView::replyFinished @ DATA]" << response.toUtf8().data();
 
         QJsonObject object = QJsonDocument::fromJson(response.toUtf8()).object();
         switch (whichFormCallIndex) {
@@ -163,8 +163,10 @@ void UserView::replyFinished(QNetworkReply* reply) {
             ui->label->setText(userName);
             emit logInResult("");
             break;
+
         case Form::CustomerMenu:
             break;
+
         case Form::ConfirmOrder:
             emit postValidSignal(true);
             break;
@@ -197,9 +199,11 @@ void UserView::replyFinished(QNetworkReply* reply) {
             }
             break;
         }
+
         case Form::ProductManagement:
             emit showMessage("成功更新" + response, 10000);
             break;
+
         case Form::SingleOrder: {
             if(subFunc == 0){
                 QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
@@ -261,12 +265,13 @@ void UserView::replyFinished(QNetworkReply* reply) {
                emit showOrdersSignal(orders);
             }    
             break;
-            
         }
+
         default:
             break;
         }
     }
+    qDebug() << "\n=======================================================================";
 }
 
 void UserView::showLoadingDialog() {
@@ -292,6 +297,8 @@ void UserView::logOutSlot() {
     whichFormCallIndex = -1;
 
     connector->logOut();
+    ui->label->setText("");
+    userName = "";
 }
 
 void UserView::getProductsInfoSlot() {
