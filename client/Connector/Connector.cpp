@@ -92,9 +92,8 @@ void Connector::deleteProducts(QList<Product> products) {
 }
 
 ///Order
-void Connector::postNewOrders(QList<Item> items){
+void Connector::postNewOrders(QList<Item> items) {
 	int size = items.size();
-    //Adding state
     QByteArray jsonData = "[";
 
     //Adding items
@@ -105,18 +104,29 @@ void Connector::postNewOrders(QList<Item> items){
     post(setRequest("/orders", jsonData.size()), jsonData);
 }
 
-void Connector::putOrder(Order order){
+void Connector::putOrder(Order order) {
 	QList<Item> items = order.getItems();
 	int size = items.size();
     //Adding state
     QByteArray jsonData = "[{";
-    jsonData += "\"id\":\"" + order.getNumber() + "\",\"items\":[";
+    jsonData += "\"id\":\"" + order.getNumber() +
+            "\",\"state\":\"" + order.getState() +
+            "\"taken_by\": \"" + order.getWhoTaken() +
+            "\",\"items\":[";
 
     //Adding items
     for (int i = 0; i < size; i++)
         if (i == size - 1) jsonData += items[i].toJson();
         else jsonData += items[i].toJson() + ",";
     jsonData += "]}]";
+    put(setRequest("/orders", jsonData.size()), jsonData);
+}
+
+void Connector::putOrderTaken(Order order) {
+    QByteArray jsonData ;
+    jsonData += "[{\"id\":\"" + order.getNumber() +
+                "\",\"state\":\"" + order.getState() + "\"}]";
+
     put(setRequest("/orders", jsonData.size()), jsonData);
 }
 

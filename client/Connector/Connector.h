@@ -32,6 +32,7 @@ public:
     ///orders
     void postNewOrders(QList<Item>);
     void putOrder(Order);
+    void putOrderTaken(Order order);
     void getOrdersInfo();
 
 private:

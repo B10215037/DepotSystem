@@ -1,26 +1,9 @@
 #include "Order.h"
 
-const QString Order::stateText[5] = {"Archived", "Submitted", "Processing", "Shipping", "Arrived"};
-
-// Order getOrder(int num){
-// 	Order tmp;
-
-// 	/*access order database*/
-
-// 	//tmp = OrderDataBaseManager::find(num);
-
-// 	return tmp;
-// }
-
-// Order getAllOrders(){
-
-// }
 Order::Order() {
-
 }
 
 Order::Order(QString id):number(id){
-
 }
 
 Product getProductWithID(ProductID id){
@@ -34,12 +17,12 @@ QString Order::getNumber(){
 }
 
 
-State Order::getState(){
+QString Order::getState(){
 	return state;
 }
 
-void Order::setState(int stateParam){
-    state = (State)stateParam;
+void Order::setState(QString stateParam){
+    state = stateParam;
 }
 
 QList<Item> Order::getItems(){

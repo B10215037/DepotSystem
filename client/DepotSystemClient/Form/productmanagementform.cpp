@@ -1,6 +1,5 @@
-#include "productmanagementform.h"
+#include "ProductManagementForm.h"
 #include "ui_productmanagementform.h"
-#include <QDebug>
 
 ProductManagementForm::ProductManagementForm(QWidget *parent) :
     Form(parent),
@@ -56,12 +55,12 @@ void ProductManagementForm::on_pushButton_clicked() //確定修改
 
 void ProductManagementForm::on_pushButton_2_clicked() //返回
 {
+    changeWindow(ProductManagement, ManagerMenu);
+
     account.newProducts.clear();
     account.editedProducts.clear();
     account.deletedProducts.clear();
     if (ui->tableView->model()) delete ui->tableView->model();
-
-    changeWindow(ProductManagement, ManagerMenu);
 }
 
 void ProductManagementForm::on_pushButton_3_clicked() //新增貨物
@@ -168,7 +167,6 @@ void ProductManagementForm::editProduct(QModelIndex index, QString oldName) { //
 
     if (ui->tableView->model()->index(index.row(), 0).data().toString() == "尚未有ID") {
         for (int i = 0; i < account.newProducts.size(); i++) {
-            qDebug()<<"DFFD"<<account.newProducts[i].getName()<<"DF"<<oldName;
             if (account.newProducts[i].getName() == oldName) {
                 account.newProducts[i].setName(name);
                 account.newProducts[i].setStock(stock);
@@ -240,10 +238,10 @@ void ProductManagementForm::showProductManagementResult(QList<Product> products)
         stock->setEditable(false);
         price->setEditable(false);
 
-        ((QStandardItemModel*) ui->tableView->model())->setItem(i, 0, id);
-        ((QStandardItemModel*) ui->tableView->model())->setItem(i, 1, name);
-        ((QStandardItemModel*) ui->tableView->model())->setItem(i, 2, stock);
-        ((QStandardItemModel*) ui->tableView->model())->setItem(i, 3, price);
+        model->setItem(i, 0, id);
+        model->setItem(i, 1, name);
+        model->setItem(i, 2, stock);
+        model->setItem(i, 3, price);
     }
 }
 

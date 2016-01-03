@@ -7,17 +7,14 @@
 
 typedef QString ProductID;
 
-enum State{Archived, Submitted, Processing, Shipping, Arrived};
 struct Item
 {
     ProductID product;
 	int amount;
 
     Item(ProductID p, int num): product(p), amount(num){
-
     }
     Item(){
-
     }
 
     QString toJson() {
@@ -34,12 +31,11 @@ struct Item
 class Order
 {
 public:
-    const static QString stateText[5];
 	Order();
 	Order(QString);
 	QString getNumber();
-	State getState();
-	void setState(int);
+    QString getState();
+    void setState(QString);
     QList<Item> getItems();
 	void addItem(QString, int);
 	int getItemAmount(QString);
@@ -57,7 +53,7 @@ public:
 
 private:
     QString number;
-	State state;
+    QString state;
 	QList<Item> items;
 	bool submitted;
 	QString orderedBy;

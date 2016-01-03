@@ -50,7 +50,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="text">
+        <string>admin</string>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -92,7 +96,7 @@
      <item>
       <widget class="QLineEdit" name="lineEdit_2">
        <property name="text">
-        <string/>
+        <string>admin</string>
        </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>

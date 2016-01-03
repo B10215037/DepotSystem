@@ -18,36 +18,36 @@ SOURCES += main.cpp\
 	Form/form.cpp \
 	Form/customermenuform.cpp \
 	Form/managermenuform.cpp \
-	Form/productmanagementform.cpp \
 	Form/ordermanagementform.cpp \
         Form/LogInForm.cpp \
         Form/checkorderform.cpp \
         Form/singleorderform.cpp \
         Form/confirmorderform.cpp \
         Form/NewProductDialog.cpp \
-        Form/modifyorderform.cpp
+        Form/modifyorderform.cpp \
+    Form/ProductManagementForm.cpp
 
 HEADERS += userview.h \
 	Form/form.h \
 	Form/customermenuform.h \
 	Form/managermenuform.h \
-	Form/productmanagementform.h \
 	Form/ordermanagementform.h \
         Form/LogInForm.h \
         Form/checkorderform.h \
         Form/singleorderform.h \
         Form/confirmorderform.h \
         Form/NewProductDialog.h \
-        Form/modifyorderform.h
+        Form/modifyorderform.h \
+    Form/ProductManagementForm.h
 
 FORMS   += userview.ui \
 	Form/customermenuform.ui \
 	Form/managermenuform.ui \
-	Form/productmanagementform.ui \
 	Form/ordermanagementform.ui \
         Form/LogInForm.ui \
         Form/checkorderform.ui \
         Form/singleorderform.ui \
         Form/confirmorderform.ui \
         Form/NewProductDialog.ui \
-        Form/modifyorderform.ui
+        Form/modifyorderform.ui \
+    Form/ProductManagementForm.ui

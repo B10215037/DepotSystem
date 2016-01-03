@@ -70,7 +70,7 @@ void CheckOrderForm::orderInfoDisplay(QModelIndex index){
         ((QStandardItemModel*) ui->tableView->model())->setItem(i, 0, name);
         ((QStandardItemModel*) ui->tableView->model())->setItem(i, 1, amount);
     }
-    ui->label_2->setText("State: " + Order::stateText[orderList[index.row()].getState()]);
+    ui->label_2->setText("State: " + orderList[index.row()].getState());
 
     curOrderIndex = index.row();
 }

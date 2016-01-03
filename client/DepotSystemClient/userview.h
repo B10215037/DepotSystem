@@ -7,7 +7,7 @@
 #include "Form/LogInForm.h"
 #include "Form/customermenuform.h"
 #include "Form/managermenuform.h"
-#include "Form/productmanagementform.h"
+#include "Form/ProductManagementForm.h"
 #include "Form/ordermanagementform.h"
 #include "Form/checkorderform.h"
 #include "Form/confirmorderform.h"
@@ -32,8 +32,6 @@ public:
 
     Connector *connector;
 
-
-
 protected:
     void resizeEvent(QResizeEvent* event);
     void setForm(int formIndex, Form *form);
@@ -50,7 +48,9 @@ private:
 signals:
     void logInResult(QString message);
     void productManagementResult(QList<Product> products);
-    void orderManagementResult(QList<Order> orders_taken, QList<Order> orders_notTaken);
+    void orderManagementResult(QList<Order> orders_taken,
+                               QList<Order> orders_notTaken,
+                               QList<Order> orders_notITake);
     void productSingleOrderResult(QList<Product> products);
     void postValidSignal(bool);
     void showOrdersSignal(QList<Order>);
@@ -63,6 +63,7 @@ private slots:
     void logInSlot(QString username, QString password);
     void logOutSlot();
     void getProductsInfoSlot();
+    void acceptOrderOrNotSlot(Order order);
     void getOrdersInfoSlot();
     void postOrdersInfoSlot(QList<Item>);
     void putOrderSlot(Order);
