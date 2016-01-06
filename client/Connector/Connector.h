@@ -34,6 +34,7 @@ public:
     void putOrder(Order);
     void putOrderTaken(Order order);
     void getOrdersInfo();
+    void deleteOrder(Order);
 
 private:
     QString serverUrl;

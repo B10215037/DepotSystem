@@ -42,6 +42,8 @@ private:
     QList<QWidget*> widgetsRecycleList;
     int whichFormCallIndex, subFunc;
     QString userName;
+    
+
 
     void showLoadingDialog();
 
@@ -71,6 +73,8 @@ private slots:
     void updateProductsSlot(QList<Product> newProducts,
                             QList<Product> changedProducts,
                             QList<Product> deletedProducts);
+
+    void deleteOrderSlot(Order);
 
 };
 

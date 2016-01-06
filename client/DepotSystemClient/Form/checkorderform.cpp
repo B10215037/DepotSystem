@@ -9,6 +9,7 @@ CheckOrderForm::CheckOrderForm(QWidget *parent) :
     ui->setupUi(this);
     connect(ui->listView, SIGNAL(clicked(QModelIndex)),
     		this, SLOT(orderInfoDisplay(QModelIndex)));
+    
 
 }
 
@@ -40,11 +41,17 @@ void CheckOrderForm::on_pushButton_3_clicked()
 
 void CheckOrderForm::showOrdersSlot(QList<Order> orders){
   	orderList = orders;
-
+    //Checking if there is null order in orederList
+    for(int k = 0;k<orderList.size();k++){
+        if(orderList[k].getNumber().size() == 0){
+            orderList.removeAt(k);
+            k--;
+        }
+    }
     QStringListModel *model = new QStringListModel(this);
   	QStringList list;
-  	for(int i = 0;i<orders.size();i++){
-  		list << orders[i].getNumber();
+  	for(int i = 0;i<orderList.size();i++){
+  		list << orderList[i].getNumber();
   	}
   	model->setStringList(list);
     ui->listView->setModel(model);
@@ -53,7 +60,6 @@ void CheckOrderForm::showOrdersSlot(QList<Order> orders){
 
 void CheckOrderForm::productsInfoSlot(QList<Product> list){
     productList = list;
-    qDebug()<<productList.size();
 }
 
 void CheckOrderForm::orderInfoDisplay(QModelIndex index){
@@ -75,12 +81,12 @@ void CheckOrderForm::orderInfoDisplay(QModelIndex index){
     }
     ui->label_2->setText("State: " + orderList[index.row()].getState());
     // qDebug()<<orderList[index.row()].getState();
-    if(orderList[index.row()].getState() != "archived"){
-        ui->pushButton->setEnabled(false);
-        ui->pushButton_2->setEnabled(false);
-    }else{
+    if(orderList[index.row()].getState() == "archived" || orderList[index.row()].getState() == "submitted"){
         ui->pushButton->setEnabled(true);
         ui->pushButton_2->setEnabled(true);
+    }else{
+        ui->pushButton->setEnabled(false);
+        ui->pushButton_2->setEnabled(false);
     }
     curOrderIndex = index.row();
 }
@@ -88,6 +94,15 @@ void CheckOrderForm::orderInfoDisplay(QModelIndex index){
 void CheckOrderForm::modifyReturnOk(Order order){
     // qDebug() << order.getItems()[0].product;
     emit putSignal(order);
+    
+    changeWindow(CheckOrder, CustomerMenu);
+}
+
+void CheckOrderForm::clearDisplaySlot(){
+    if(((QStandardItemModel*) ui->tableView->model()))
+        ((QStandardItemModel*) ui->tableView->model())->clear();
+    // if(((QStandardItemModel*) ui->listView->model()))
+    //     ((QStandardItemModel*) ui->listView->model())->clear();
 }
 
 QString CheckOrderForm::returnProductName(QString pid){
@@ -97,4 +112,10 @@ QString CheckOrderForm::returnProductName(QString pid){
         }
     }
     return "";
+}
+
+void CheckOrderForm::on_pushButton_2_clicked()
+{
+    emit deleteOrderSignal(orderList[curOrderIndex]);
+    changeWindow(CheckOrder, CustomerMenu);
 }

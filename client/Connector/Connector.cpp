@@ -135,6 +135,13 @@ void Connector::getOrdersInfo() {
     get(setRequest("/orders", 0));
 }
 
+void Connector::deleteOrder(Order order){
+	QByteArray jsonData ;
+    jsonData += "{\"data\":[\"" + order.getNumber() +
+                "\"],\"_DELETE\":\"true\"}";
+	post(setRequest("/orders", jsonData.size()), jsonData);
+}
+
 QNetworkRequest Connector::setRequest(QString path, int dataSize) {
     QUrl qurl(serverUrl + path);
     QNetworkRequest request(qurl);

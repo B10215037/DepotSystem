@@ -21,6 +21,7 @@ signals:
     void logOutSignal();
     void getProductsInfoSignal();
     void getOrdersInfoSignal();
+    void clearDisplaySignal();
 
 private slots:
     void on_pushButton_3_clicked();

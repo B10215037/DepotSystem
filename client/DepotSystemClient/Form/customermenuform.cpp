@@ -28,5 +28,6 @@ void CustomerMenuForm::on_pushButton_clicked()
 void CustomerMenuForm::on_pushButton_2_clicked()
 {
     emit getOrdersInfoSignal();
+    emit clearDisplaySignal();
     changeWindow(CustomerMenu, CheckOrder);
 }

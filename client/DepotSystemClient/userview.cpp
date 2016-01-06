@@ -60,11 +60,15 @@ UserView::UserView(QWidget *parent) :
 
     connect((CheckOrderForm*) forms[Form::CheckOrder], SIGNAL(putSignal(Order)),
             this, SLOT(putOrderSlot(Order)));
-
+    connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(clearDisplaySignal()),
+            (CheckOrderForm*) forms[Form::CheckOrder], SLOT(clearDisplaySlot()));
     
 
     connect(this, SIGNAL(checkOrderProductsResult(QList<Product>)),
             (CheckOrderForm*) forms[Form::CheckOrder], SLOT(productsInfoSlot(QList<Product>)));
+
+    connect((CheckOrderForm*) forms[Form::CheckOrder], SIGNAL(deleteOrderSignal(Order)),
+            this, SLOT(deleteOrderSlot(Order)));
 
     ///ConfirmOrder
     setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget)); 
@@ -97,6 +101,7 @@ UserView::UserView(QWidget *parent) :
 
     ui->widget->resize(378, 232);
     ui->label->setText("");
+
 }
 
 UserView::~UserView()
@@ -142,6 +147,13 @@ void UserView::replyFinished(QNetworkReply* reply) {
         case Form::ConfirmOrder:
             emit postValidSignal(false);
             break;
+        case Form::CheckOrder:
+            if(subFunc == 2){
+                emit showMessage(response, 10000);
+            }else{
+                emit showMessage("delete failed" + response, 10000);
+            }
+            
         default:
             break;
         }
@@ -255,6 +267,7 @@ void UserView::replyFinished(QNetworkReply* reply) {
             getOrdersInfoSlot();
             break;
 
+
         case Form::SingleOrder: {
             if(subFunc == 0){
                 QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
@@ -305,17 +318,23 @@ void UserView::replyFinished(QNetworkReply* reply) {
         }
 
         case Form::CheckOrder:{
-            
-               QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
-                QList<Product> products;
-                for (int i = 0; i < array.size(); i++) {
-                    Product product(array[i].toObject()["_id"].toString());
-                    product.setName(array[i].toObject()["name"].toString());
-                    product.setStock(array[i].toObject()["stock"].toInt());
-                    product.setPrice(array[i].toObject()["price"].toInt());
-                    products.append(product);
+                if(subFunc == 1){
+                    QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
+                    QList<Product> products;
+                    for (int i = 0; i < array.size(); i++) {
+                        Product product(array[i].toObject()["_id"].toString());
+                        product.setName(array[i].toObject()["name"].toString());
+                        product.setStock(array[i].toObject()["stock"].toInt());
+                        product.setPrice(array[i].toObject()["price"].toInt());
+                        products.append(product);
+                    }
+                    emit checkOrderProductsResult(products);
+                }else if(subFunc == 2){
+                    emit showMessage("成功更新", 10000);
+                }else if(subFunc == 3){
+                    emit showMessage("刪除成功", 10000);
                 }
-                emit checkOrderProductsResult(products);
+                
 
             break;
         }
@@ -401,8 +420,18 @@ void UserView::postOrdersInfoSlot(QList<Item> items){
 }
 
 void UserView::putOrderSlot(Order order){
+    showLoadingDialog();
+    whichFormCallIndex = Form::CheckOrder;
+    subFunc = 2;
     connector->putOrder(order);
 
+}
+
+void UserView::deleteOrderSlot(Order order){
+    showLoadingDialog();
+    whichFormCallIndex = Form::CheckOrder;
+    subFunc = 3;
+    connector->deleteOrder(order);
 }
 
 void UserView::updateProductsSlot(QList<Product> newProducts,
