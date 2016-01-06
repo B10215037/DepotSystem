@@ -22,6 +22,7 @@ UserView::UserView(QWidget *parent) :
             this, SLOT(getOrdersInfoSlot()));
     connect((CustomerMenuForm*) forms[Form::CustomerMenu], SIGNAL(logOutSignal()),
             this, SLOT(logOutSlot()));
+    
 
     ///ManagerMenu
     setForm(Form::ManagerMenu, new ManagerMenuForm(ui->widget));
@@ -59,6 +60,11 @@ UserView::UserView(QWidget *parent) :
 
     connect((CheckOrderForm*) forms[Form::CheckOrder], SIGNAL(putSignal(Order)),
             this, SLOT(putOrderSlot(Order)));
+
+    
+
+    connect(this, SIGNAL(checkOrderProductsResult(QList<Product>)),
+            (CheckOrderForm*) forms[Form::CheckOrder], SLOT(productsInfoSlot(QList<Product>)));
 
     ///ConfirmOrder
     setForm(Form::ConfirmOrder, new ConfirmOrderForm(ui->widget)); 
@@ -289,7 +295,28 @@ void UserView::replyFinished(QNetworkReply* reply) {
                     
                 }
                emit showOrdersSignal(orders);
-            }    
+
+               //Get the product list
+               whichFormCallIndex = Form::CheckOrder;
+
+               connector->getProductsInfo();
+            }
+            break;
+        }
+
+        case Form::CheckOrder:{
+            
+               QJsonArray array = QJsonDocument::fromJson(response.toUtf8()).array();
+                QList<Product> products;
+                for (int i = 0; i < array.size(); i++) {
+                    Product product(array[i].toObject()["_id"].toString());
+                    product.setName(array[i].toObject()["name"].toString());
+                    product.setStock(array[i].toObject()["stock"].toInt());
+                    product.setPrice(array[i].toObject()["price"].toInt());
+                    products.append(product);
+                }
+                emit checkOrderProductsResult(products);
+
             break;
         }
 
@@ -369,6 +396,7 @@ void UserView::postOrdersInfoSlot(QList<Item> items){
     if(userName.at(0) != 'A'){
         whichFormCallIndex = Form::ConfirmOrder;
     }
+    showLoadingDialog();
     connector->postNewOrders(items);
 }
 

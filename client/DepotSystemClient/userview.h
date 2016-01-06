@@ -54,6 +54,7 @@ signals:
     void productSingleOrderResult(QList<Product> products);
     void postValidSignal(bool);
     void showOrdersSignal(QList<Order>);
+    void checkOrderProductsResult(QList<Product>);
 
 private slots:
     void changeWindow(int from, int to);

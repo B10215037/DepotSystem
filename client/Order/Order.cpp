@@ -8,7 +8,7 @@ Order::Order(QString id):number(id){
 
 Product getProductWithID(ProductID id){
 	Product p;
-/*	Getting Product*/
+	
 	return p;
 }
 

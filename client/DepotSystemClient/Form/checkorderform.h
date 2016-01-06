@@ -24,6 +24,7 @@ public:
 signals:
     void transferOrderModify(Order);
     void putSignal(Order);
+    void getProductsInfoSignal();
 
 private slots:
     void on_pushButton_clicked();
@@ -31,12 +32,15 @@ private slots:
     void showOrdersSlot(QList<Order>);
     void orderInfoDisplay(QModelIndex);
     void modifyReturnOk(Order);
+    void productsInfoSlot(QList<Product>);
 
 private:
     Ui::CheckOrderForm *ui;
     QList<Order> orderList;
     QStandardItemModel *model;	//tableView
     int curOrderIndex;
+    QList<Product> productList; //Used for finding corresponding name
+    QString returnProductName(QString); 
 };
 
 #endif // CHECKORDERFORM_H

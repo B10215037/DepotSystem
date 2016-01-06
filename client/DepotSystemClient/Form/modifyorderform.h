@@ -6,6 +6,8 @@
 #include "form/form.h"
 #include "../Order/Order.h"
 #include <QStandardItemModel>
+#include <QLabel>
+
 
 namespace Ui {
 class ModifyOrderForm;
@@ -18,6 +20,7 @@ class ModifyOrderForm : public QDialog
 public:
     explicit ModifyOrderForm(QWidget *parent = 0);
     ~ModifyOrderForm();
+    QList<Product> productList;
 
 signals:
 	void modifyOk(Order);
@@ -31,6 +34,11 @@ private slots:
 private:
     Ui::ModifyOrderForm *ui;
     Order targetOrder;
+    QString returnProductName(QString);
+
+    //Popup dialog
+    QDialog* dialog;
+    QPushButton *confirmButton;
 };
 
 #endif // MODIFYORDERFORM_H

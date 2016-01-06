@@ -5,7 +5,7 @@ CheckOrderForm::CheckOrderForm(QWidget *parent) :
     Form(parent),
     ui(new Ui::CheckOrderForm)
 {
-	curOrderIndex = -1;
+  	curOrderIndex = -1;
     ui->setupUi(this);
     connect(ui->listView, SIGNAL(clicked(QModelIndex)),
     		this, SLOT(orderInfoDisplay(QModelIndex)));
@@ -19,8 +19,9 @@ CheckOrderForm::~CheckOrderForm()
 
 void CheckOrderForm::on_pushButton_clicked()
 {
-	if(curOrderIndex > -1){
+  	if(curOrderIndex > -1){
        ModifyOrderForm* modifyForm = new ModifyOrderForm(this);
+       modifyForm->productList = productList;
        connect(this, SIGNAL(transferOrderModify(Order)),
                modifyForm, SLOT(transferOrderModifySlot(Order)));
        connect(modifyForm, SIGNAL(modifyOk(Order)),
@@ -28,7 +29,7 @@ void CheckOrderForm::on_pushButton_clicked()
 
        emit transferOrderModify(orderList[curOrderIndex]);
        modifyForm->exec();
-	}
+  	}
     
 }
 
@@ -38,22 +39,24 @@ void CheckOrderForm::on_pushButton_3_clicked()
 }
 
 void CheckOrderForm::showOrdersSlot(QList<Order> orders){
-	orderList = orders;
+  	orderList = orders;
 
     QStringListModel *model = new QStringListModel(this);
-	QStringList list;
-	for(int i = 0;i<orders.size();i++){
-		list << orders[i].getNumber();
-	}
-	model->setStringList(list);
+  	QStringList list;
+  	for(int i = 0;i<orders.size();i++){
+  		list << orders[i].getNumber();
+  	}
+  	model->setStringList(list);
     ui->listView->setModel(model);
 
 }
 
+void CheckOrderForm::productsInfoSlot(QList<Product> list){
+    productList = list;
+    qDebug()<<productList.size();
+}
+
 void CheckOrderForm::orderInfoDisplay(QModelIndex index){
-	// if(model != NULL){
-	// 	delete model;
-	// }
     model = new QStandardItemModel(0, 2);
     model->setHorizontalHeaderItem(0, new QStandardItem("Name"));
     model->setHorizontalHeaderItem(1, new QStandardItem("Amount"));
@@ -61,7 +64,7 @@ void CheckOrderForm::orderInfoDisplay(QModelIndex index){
     ui->tableView->setModel(model);
     QList<Item> itemsTmp = orderList[index.row()].getItems();
     for (int i = 0; i < itemsTmp.size(); i++) {
-        QStandardItem *name = new QStandardItem(itemsTmp[i].product),
+        QStandardItem *name = new QStandardItem(returnProductName(itemsTmp[i].product)),
                 	  *amount = new QStandardItem(QString::number(itemsTmp[i].amount));
 
         name->setEditable(false);
@@ -71,10 +74,27 @@ void CheckOrderForm::orderInfoDisplay(QModelIndex index){
         ((QStandardItemModel*) ui->tableView->model())->setItem(i, 1, amount);
     }
     ui->label_2->setText("State: " + orderList[index.row()].getState());
-
+    // qDebug()<<orderList[index.row()].getState();
+    if(orderList[index.row()].getState() != "archived"){
+        ui->pushButton->setEnabled(false);
+        ui->pushButton_2->setEnabled(false);
+    }else{
+        ui->pushButton->setEnabled(true);
+        ui->pushButton_2->setEnabled(true);
+    }
     curOrderIndex = index.row();
 }
 
 void CheckOrderForm::modifyReturnOk(Order order){
+    // qDebug() << order.getItems()[0].product;
     emit putSignal(order);
+}
+
+QString CheckOrderForm::returnProductName(QString pid){
+    for(int i = 0;i<productList.size();i++){
+        if(productList[i].getID() == pid){
+            return productList[i].getName();
+        }
+    }
+    return "";
 }

@@ -110,8 +110,8 @@ void Connector::putOrder(Order order) {
     //Adding state
     QByteArray jsonData = "[{";
     jsonData += "\"id\":\"" + order.getNumber() +
-            "\",\"state\":\"" + order.getState() +
-            "\"taken_by\": \"" + order.getWhoTaken() +
+            // "\",\"state\":\"" + order.getState() +
+            "\",\"taken_by\": \"" + order.getWhoTaken() +
             "\",\"items\":[";
 
     //Adding items
@@ -119,6 +119,7 @@ void Connector::putOrder(Order order) {
         if (i == size - 1) jsonData += items[i].toJson();
         else jsonData += items[i].toJson() + ",";
     jsonData += "]}]";
+	qDebug() << jsonData;
     put(setRequest("/orders", jsonData.size()), jsonData);
 }
 

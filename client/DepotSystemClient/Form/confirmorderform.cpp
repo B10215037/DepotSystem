@@ -13,6 +13,8 @@ ConfirmOrderForm::ConfirmOrderForm(QWidget *parent) :
     confirmButton->setText("確認");
     connect(confirmButton, SIGNAL(clicked()),
             dialog, SLOT(close()));
+    connect(dialog, SIGNAL(finished(int)),
+            this, SLOT(dialogDestructSlot(int)));
 }
 
 ConfirmOrderForm::~ConfirmOrderForm()
@@ -28,8 +30,7 @@ void ConfirmOrderForm::on_pushButton_2_clicked()
 void ConfirmOrderForm::on_pushButton_clicked()
 {
    	emit postOrdersInfoSignal(orderList);
-
-    changeWindow(ConfirmOrder, CustomerMenu);
+    
 }
 
 void ConfirmOrderForm::transferOrderSlot(QList<Item> items, QList<QString> names){
@@ -58,6 +59,7 @@ void ConfirmOrderForm::showConfirmedDialog(){
     QLabel *content = new QLabel("訂單已上傳" ,dialog);
 
     dialog->show();
+    changeWindow(ConfirmOrder, CustomerMenu);
 }
 
 void ConfirmOrderForm::showFailedDialog(){
@@ -65,6 +67,7 @@ void ConfirmOrderForm::showFailedDialog(){
     QLabel *content = new QLabel("庫存不足" ,dialog);
 
     dialog->show();
+    changeWindow(ConfirmOrder, CustomerMenu);
 }
 
 void ConfirmOrderForm::postValid(bool valid){
@@ -73,4 +76,8 @@ void ConfirmOrderForm::postValid(bool valid){
 	}else{
         showFailedDialog();
 	}
+}
+
+void ConfirmOrderForm::dialogDestructSlot(int accepted){
+    delete dialog->findChild<QLabel*>();
 }

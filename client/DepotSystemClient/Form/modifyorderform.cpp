@@ -22,7 +22,7 @@ void ModifyOrderForm::transferOrderModifySlot(Order order){
     ui->tableView->setModel(model);
     QList<Item> items = order.getItems();
     for (int i = 0; i < items.size(); i++) {
-        QStandardItem *name = new QStandardItem(items[i].product),
+        QStandardItem *name = new QStandardItem(returnProductName(items[i].product)),
                 	  *amount = new QStandardItem(QString::number(items[i].amount));
 
         name->setEditable(false);
@@ -40,11 +40,35 @@ void ModifyOrderForm::on_pushButton_2_clicked()
 
 void ModifyOrderForm::on_pushButton_clicked()
 {
+    bool isValid = true;
     for(int i = 0;i<targetOrder.getItems().size();i++){
         QModelIndex index = ((QStandardItemModel*) ui->tableView->model())->index(i,1,QModelIndex());
-        int curAmount = ((QStandardItemModel*) ui->tableView->model())->data(index).toInt();
+        int curAmount = ((QStandardItemModel*) ui->tableView->model())->data(index).toInt(&isValid);
+        if (!isValid)   break;
     	targetOrder.setItemAmount(targetOrder.getItems()[i].product, curAmount);
     }
-    emit modifyOk(targetOrder);
-    close();
+    if(isValid){
+        emit modifyOk(targetOrder);
+        close();
+    }else{
+        dialog = new QDialog(this, Qt::Popup);
+        confirmButton = new QPushButton(dialog);
+        dialog->setSizeIncrement(QSize(200, 70));
+        confirmButton->setGeometry(QRect(70, 20, 60, 30));
+        confirmButton->setText("確認");
+        connect(confirmButton, SIGNAL(clicked()),
+                dialog, SLOT(close()));
+        QLabel *content = new QLabel("Invalid input!" ,dialog);
+
+        dialog->show();
+    }
+}
+
+QString ModifyOrderForm::returnProductName(QString pid){
+    for(int i = 0;i<productList.size();i++){
+        if(productList[i].getID() == pid){
+            return productList[i].getName();
+        }
+    }
+    return "";
 }

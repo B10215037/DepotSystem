@@ -29,6 +29,7 @@ private slots:
     void on_pushButton_clicked();
     void transferOrderSlot(QList<Item>, QList<QString>);
     void postValid(bool);
+    void dialogDestructSlot(int);
 
 private:
     Ui::ConfirmOrderForm *ui;
