@@ -119,6 +119,7 @@ server.get('/products', function(req, res, next) {
 server.post('/products', checkLoginned, checkAdmin, function(req, res, next) {
     if (! req.params._DELETE) {
         for (let item of req.params) if (! item.name) return next(new restify.BadRequestError('WRONG FORMAT'));
+        if (req.params.length == 0) return res.send(200);
 
         let saved = 0;
         for (let item of req.params) {
@@ -138,6 +139,8 @@ server.post('/products', checkLoginned, checkAdmin, function(req, res, next) {
             });
         }
     } else {
+        if (req.params.data.length == 0) return res.send(200);
+        
         let saved = 0;
         req.params.data.forEach(function(productId) {
             Product.findOne({ _id: productId }, function(err, product) {
@@ -223,40 +226,43 @@ server.get('/orders', checkLoginned, function(req, res, next) {
         if (! user) return next(new restify.UnautorizedError('USER NOT EXISTED'));
 
         var response = {};
-        Account.findOne({ username: req.depotSession.username }, function(err, user) {
-            if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+        response.MY_ORDERS = [];
+        if (user.type == 'customer') {
+            if (user.orders.length == 0) return res.send(200, response);
 
-            response.MY_ORDERS = [];
-            if (user.type == 'customer') {
-                let got = 0;
-                for (let orderId of user.orders) {
-                    Order.findOne({ _id: orderId }, function(err, order) {
-                        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-
-                        response.MY_ORDERS.push(order);
-                        if (++got == user.orders.length) res.send(200, response);
-                    });
-                }
-            } else if (user.type == 'admin') {
-                response.I_TAKE = [];
-                response.NOT_TAKEN = [];
-                Order.find({}, function(err, orders) {
+            let got = 0;
+            for (let orderId of user.orders) {
+                Order.findOne({ _id: orderId }, function(err, order) {
                     if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                    for (let order of orders) {
-                        if (order.ordered_by == user.username) {
-                            response.MY_ORDERS.push(order);
-                        }
-                        if (! order.taken_by && order.state == 'submitted') {
-                            response.NOT_TAKEN.push(order);
-                        }
-                        if (order.taken_by == user.username) {
-                            response.I_TAKE.push(order);
-                        }
-                    }
-                    res.send(200, response);
+
+                    response.MY_ORDERS.push(order);
+                    if (++got == user.orders.length) res.send(200, response);
                 });
             }
-        });
+        } else if (user.type == 'admin') {
+            response.I_TAKE = [];
+            response.NOT_TAKEN = [];
+            response.NOT_MY_BUSINESS = [];
+            Order.find({}, function(err, orders) {
+                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+                for (let order of orders) {
+                    if (order.ordered_by == user.username) {
+                        response.MY_ORDERS.push(order);
+                    }
+                    if (! order.taken_by && order.state == 'submitted') {
+                        response.NOT_TAKEN.push(order);
+                    }
+                    if (order.taken_by) {
+                        if (order.taken_by == user.username) {
+                            response.I_TAKE.push(order);
+                        } else {
+                            response.NOT_MY_BUSINESS.push(order);
+                        }
+                    }
+                }
+                res.send(200, response);
+            });
+        }
     });
 });
 
@@ -278,8 +284,8 @@ server.post('/orders', checkLoginned, function(req, res, next) {
                 product.save(function(err) {
                     if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
                     total += item.amount * product.price;
-                    if (lookupItems[item.productId]) {
-                        lookupItems[item.productId].amount += parseInt(item.amount);
+                    if (lookup[item.productId]) {
+                        lookup[item.productId].amount += parseInt(item.amount);
                     } else {
                         items.push({
                             productId: item.productId,
@@ -290,7 +296,7 @@ server.post('/orders', checkLoginned, function(req, res, next) {
 
                     if (items.length == req.params.length) {
                         var order = new Order({
-                            state: 'archived',
+                            state: 'submitted',
                             items: items,
                             ordered_by: req.depotSession.username
                         });
@@ -310,17 +316,18 @@ server.post('/orders', checkLoginned, function(req, res, next) {
         });
     } else if (req.params._DELETE == 'true') {
         for (let orderId of req.params.data) if (! orderId) return next(new restify.BadRequestError('WRONG FORMAT'));
+        if (req.params.data.length == 0) return res.send(200);
 
         let removed = 0
         for (let orderId of req.params.data) {
             Order.findOne({ _id: orderId }, function(err, order) {
                 if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                if (order.state != 'archived') return next(new restify.ForbiddenError('HAVE SUBMITTED'));
+                if (order.taken_by) return next(new restify.ForbiddenError('PROCESSING CANT DELETE'));
                 if (order.ordered_by != req.depotSession.username) return next(new restify.ForbiddenError('NOT YOUR ORDER'));
 
                 order.remove(function(err) {
                     if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                    if (++removed == req.params.length) res.send(200);
+                    if (++removed == req.params.data.length) res.send(200);
                 });
             });
         }
@@ -334,48 +341,45 @@ server.put('/orders', checkLoginned, function(req, res, next) {
         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
         if (! user) return next(new restify.BadRequestError('USER NOT EXISTED'));
 
+        let saved = 0;
         for (let order of req.params) {
             Order.findOne({ _id: order.id }, function(err, dbOrder) {
                 if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
                 if (! dbOrder) return next(new restify.BadRequestError('ORDER NOT EXISTED'));
-
-                if (order.taken_by) {
-                    if (user.type != 'admin')
-                        return next(new restify.ForbiddenError('CUSTOMER CAN ONLY MODIFY ORDER ITEMS'));
-                    if (dbOrder.state == 'archived')
-                        return next(new restify.ForbiddenError('NOT YET SUBMITTED'));
-                    if (dbOrder.taken_by && dbOrder.taken_by != order.taken_by)
-                        return next(new restify.ForbiddenError('ALREADY TAKEN'));
-
-                    dbOrder.taken_by = order.taken_by;
-                }
-
+                if (req.params.length == 0) return res.send(200);
+                
                 if (! order.items) {
                     if (order.state) {
-                        if (user.type == 'customer' && order.state != 'archived' && order.state != 'submitted')
-                            return next(new restify.ForbiddenError('ONLY ADMIN CAN CHANGE TRANSFER STATE'));
-                        if (user.type == 'admin' && dbOrder.taken_by != req.depotSession.username)
+                        if (user.type != 'admin')
+                            return next(new restify.ForbiddenError('CUSTOMER NOT ALLOWED CHANGE STATE'));
+                        if (dbOrder.taken_by && dbOrder.taken_by != req.depotSession.username)
                             return next(new restify.ForbiddenError('NOT YOUR BUSINESS'));
 
                         dbOrder.state = order.state;
+                        dbOrder.taken_by = req.depotSession.username;
+
+                        if (++saved == req.params.length) {
+                            dbOrder.save(function(err) {
+                                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+                                res.send(200);
+                            });
+                        }
                     }
-
-                    dbOrder.save(function(err) {
-                        if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-
-                        res.send(200);
-                    });
                 } else {
-                    if (dbOrder.state != 'archived' || dbOrder.ordered_by != req.depotSession.username)
-                        return next(new restify.ForbiddenError('AFTER SUBMITTED UPDATE ITEMS NOT ALLOWED'));
+                    if (dbOrder.taken_by)
+                        return next(new restify.ForbiddenError('UPDATE ITEMS NOT ALLOWED AFTER PROCESSING'));
+                    if (dbOrder.ordered_by != req.depotSession.username)
+                        return next(new restify.ForbiddenError('NOT YOUR ORDER NOT ALLOWED CHANGE ITEMS'));
 
                     if (order.state) {
-                        if (user.type == 'customer' && order.state != 'archived' && order.state != 'submitted')
-                            return next(new restify.ForbiddenError('ONLY ADMIN CAN CHANGE TRANSFER STATE'));
-                        if (user.type == 'admin' && dbOrder.taken_by != req.depotSession.username)
+                        if (user.type != 'admin')
+                            return next(new restify.ForbiddenError('CUSTOMER NOT ALLOWED CHANGE STATE'));
+                        if (dbOrder.taken_by && dbOrder.taken_by != req.depotSession.username)
                             return next(new restify.ForbiddenError('NOT YOUR BUSINESS'));
 
                         dbOrder.state = order.state;
+                        dbOrder.taken_by = req.depotSession.username;
                     }
 
                     for (let item of order.items) {
@@ -386,7 +390,7 @@ server.put('/orders', checkLoginned, function(req, res, next) {
                         });
                     }
 
-                    let saved = 0;
+                    let savedItems = 0;
                     let lookupDb = {};
                     let getIndex = {};
                     for (let i in dbOrder.items) {
@@ -405,11 +409,14 @@ server.put('/orders', checkLoginned, function(req, res, next) {
                                         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
 
                                         dbOrder.items.splice(getIndex[item.productId], 1);
-                                        if (++saved == order.items.length) {
-                                            dbOrder.save(function(err) {
-                                                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                                                res.send(200);
-                                            });
+                                        if (++savedItems == order.items.length) {
+                                            if (++saved == req.params.length) {
+                                                dbOrder.save(function(err) {
+                                                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+                                                    res.send(200);
+                                                });
+                                            }
                                         }
 
                                         lookupDb = {};
@@ -431,18 +438,20 @@ server.put('/orders', checkLoginned, function(req, res, next) {
                                     product.save(function(err) {
                                         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
 
-                                        if (++saved == order.items.length) {
-                                            dbOrder.save(function(err) {
-                                                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                                                res.send(200);
-                                            });
+                                        if (++savedItems == order.items.length) {
+                                            if (++saved == req.params.length) {
+                                                dbOrder.save(function(err) {
+                                                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+                                                    res.send(200);
+                                                });
+                                            }
                                         }
                                     });
                                 });
                             }
                         } else {
                             if (! item.cancelled && item.amount) {
-                                console.log(1);
                                 Product.findOne({ _id: item.productId }, function(err, product) {
                                     if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
                                     if (! product) return next(new restify.BadRequestError('PRODUCT NOT EXISTED'));
@@ -459,11 +468,14 @@ server.put('/orders', checkLoginned, function(req, res, next) {
                                         lookupDb[item.productId] = dbOrder.items[dbOrder.items.length - 1];
                                         getIndex[item.productId] = dbOrder.items.length - 1;
 
-                                        if (++saved == order.items.length) {
-                                            dbOrder.save(function(err) {
-                                                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                                                res.send(200);
-                                            });
+                                        if (++savedItems == order.items.length) {
+                                            if (++saved == req.params.length) {
+                                                dbOrder.save(function(err) {
+                                                    if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
+
+                                                    res.send(200);
+                                                });
+                                            }
                                         }
                                     });
                                 });
@@ -473,26 +485,21 @@ server.put('/orders', checkLoginned, function(req, res, next) {
                 }
             });
         }
-        res.send(200);
     });
 });
 
 server.del('/orders/:id', function(req, res, next) {
     Order.findOne({ _id: req.params.id }, function(err, order) {
         if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-        if (order.state != 'archived') return next(new restify.ForbiddenError('HAVE SUBMITTED'));
+        if (order.taken_by) return next(new restify.ForbiddenError('PROCESSING CANT DELETE'));
         if (order.ordered_by != req.depotSession.username) return next(new restify.ForbiddenError('NOT YOUR ORDER'));
 
         order.remove(function(err) {
             if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
 
-            order.remove(function(err) {
-                if (err) return next(new restify.InternalServerError('DATABASE ERROR'));
-                if (++removed == req.params.length) res.send(200);
-            }).exec();;
             res.send(200);
         });
     });
 });
 
-server.listen(80);
+server.listen(process.env.PORT || 80);
